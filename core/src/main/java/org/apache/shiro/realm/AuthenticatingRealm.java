@@ -18,6 +18,7 @@
  */
 package org.apache.shiro.realm;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.shiro.authc.AuthenticationException;
@@ -619,10 +620,16 @@ public abstract class AuthenticatingRealm extends CachingRealm implements Initia
     AuthenticationInfo ensureSimulatedAuthenticationInfo() {
         AuthenticationInfo info = simulatedAuthenticationInfo.get();
         if (info == null) {
-            getCredentialsMatcher().createSimulatedCredentials()
-                    .ifPresentOrElse(simulatedAuthenticationInfo::set, () -> log.warn(
-                            "CredentialsMatcher [{}] did not supply simulated credentials. Please update the implementation.",
-                            getCredentialsMatcher()));
+            Optional<AuthenticationInfo> simulated =
+                    getCredentialsMatcher().createSimulatedCredentials();
+
+            if (simulated.isPresent()) {
+                simulatedAuthenticationInfo.set(simulated.get());
+            } else {
+                log.warn(
+                        "CredentialsMatcher [{}] did not supply simulated credentials. Please update the implementation.",
+                        getCredentialsMatcher());
+            }
             return simulatedAuthenticationInfo.get();
         }
         return info;
