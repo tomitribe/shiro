@@ -117,6 +117,7 @@
         <gmaven.version>3.0.2</gmaven.version>
         <groovy.version>2.5.23</groovy.version>
         <junit.version>4.13.2</junit.version>
+        <mockito.version>5.21.0</mockito.version>
         <junit.server.jetty.version>0.11.0</junit.server.jetty.version>
         <hibernate.version>5.6.15.Final</hibernate.version>
         <taglibs.standard.version>1.2.5</taglibs.standard.version>
@@ -330,6 +331,7 @@
                             <exclude>**/spring.factories</exclude>
                             <exclude>**/spring.provides</exclude>
                             <exclude>**/*.iml</exclude>
+                            <exclude>**/org.mockito.plugins.MockMaker</exclude>
                         </excludes>
                     </configuration>
                 </plugin>
@@ -741,9 +743,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.27.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>${easymock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Writing tests in groovy is fast!: -->
@@ -1420,6 +1434,7 @@
                         <exclude>**/spring.factories</exclude>
                         <exclude>**/spring.provides</exclude>
                         <exclude>**/*.iml</exclude>
+                        <exclude>**/org.mockito.plugins.MockMaker</exclude>
                     </excludes>
                 </configuration>
             </plugin>
