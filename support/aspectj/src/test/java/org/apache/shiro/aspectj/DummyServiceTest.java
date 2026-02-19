@@ -22,43 +22,48 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.shiro.ini.IniSecurityManagerFactory;
-import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.env.BasicIniEnvironment;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.lang.util.Factory;
-import org.junit.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
+ *
  */
+@SuppressWarnings("checkstyle:MethodName")
 public class DummyServiceTest {
 
-    private static DummyService SECURED_SERVICE;
-    private static DummyService RESTRICTED_SERVICE;
+    private static DummyService securedService;
+    private static DummyService restrictedService;
 
-    @BeforeClass
+    private Subject subject;
+
+    @BeforeAll
     public static void setUpClass() throws Exception {
-        Factory<SecurityManager> factory = new IniSecurityManagerFactory("classpath:shiroDummyServiceTest.ini");
-        SecurityManager securityManager = factory.getInstance();
-        SecurityUtils.setSecurityManager(securityManager);
+        var basicIniEnvironment = new BasicIniEnvironment("classpath:shiroDummyServiceTest.ini");
+        SecurityUtils.setSecurityManager(basicIniEnvironment.getSecurityManager());
 
-        SECURED_SERVICE = new SecuredDummyService();
-        RESTRICTED_SERVICE = new RestrictedDummyService();
+        securedService = new SecuredDummyService();
+        restrictedService = new RestrictedDummyService();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass() throws Exception {
         //don't corrupt other test cases since this is static memory:
         SecurityUtils.setSecurityManager(null);
     }
 
-    private Subject subject;
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         subject = SecurityUtils.getSubject();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         subject.logout();
     }
@@ -73,113 +78,129 @@ public class DummyServiceTest {
 
     // TEST ANONYMOUS
     @Test
-    public void testAnonymous_asAnonymous() throws Exception {
-        SECURED_SERVICE.anonymous();
+    void testAnonymous_asAnonymous() throws Exception {
+        securedService.anonymous();
     }
 
     @Test
-    public void testAnonymous_asUser() throws Exception {
+    void testAnonymous_asUser() throws Exception {
         loginAsUser();
-        SECURED_SERVICE.anonymous();
+        securedService.anonymous();
     }
 
     @Test
-    public void testAnonymous_asAdmin() throws Exception {
+    void testAnonymous_asAdmin() throws Exception {
         loginAsAdmin();
-        SECURED_SERVICE.anonymous();
+        securedService.anonymous();
     }
 
     // TEST GUEST
     @Test
-    public void testGuest_asAnonymous() throws Exception {
-        SECURED_SERVICE.guest();
+    void testGuest_asAnonymous() throws Exception {
+        securedService.guest();
     }
 
-    @Test(expected = UnauthenticatedException.class)
-    public void testGuest_asUser() throws Exception {
-        loginAsUser();
-        SECURED_SERVICE.guest();
+    @Test
+    void testGuest_asUser() throws Exception {
+        assertThrows(UnauthenticatedException.class, () -> {
+            loginAsUser();
+            securedService.guest();
+        });
     }
 
-    @Test(expected = UnauthenticatedException.class)
-    public void testGuest_asAdmin() throws Exception {
-        loginAsAdmin();
-        SECURED_SERVICE.guest();
+    @Test
+    void testGuest_asAdmin() throws Exception {
+        assertThrows(UnauthenticatedException.class, () -> {
+            loginAsAdmin();
+            securedService.guest();
+        });
     }
 
     // TEST PEEK
-    @Test(expected = UnauthenticatedException.class)
-    public void testPeek_asAnonymous() throws Exception {
-        SECURED_SERVICE.peek();
+    @Test
+    void testPeek_asAnonymous() throws Exception {
+        assertThrows(UnauthenticatedException.class, () -> {
+            securedService.peek();
+        });
     }
 
     @Test
-    public void testPeek_asUser() throws Exception {
+    void testPeek_asUser() throws Exception {
         loginAsUser();
-        SECURED_SERVICE.peek();
+        securedService.peek();
     }
 
     @Test
-    public void testPeek_asAdmin() throws Exception {
+    void testPeek_asAdmin() throws Exception {
         loginAsAdmin();
-        SECURED_SERVICE.peek();
+        securedService.peek();
     }
 
     // TEST RETRIEVE
-    @Test(expected = UnauthenticatedException.class)
     //UnauthenticatedException per SHIRO-146
-    public void testRetrieve_asAnonymous() throws Exception {
-        SECURED_SERVICE.retrieve();
+    @Test
+    void testRetrieve_asAnonymous() throws Exception {
+        assertThrows(UnauthenticatedException.class, () -> {
+            securedService.retrieve();
+        });
     }
 
     @Test
-    public void testRetrieve_asUser() throws Exception {
+    void testRetrieve_asUser() throws Exception {
         loginAsUser();
-        SECURED_SERVICE.retrieve();
+        securedService.retrieve();
     }
 
     @Test
-    public void testRetrieve_asAdmin() throws Exception {
+    void testRetrieve_asAdmin() throws Exception {
         loginAsAdmin();
-        SECURED_SERVICE.retrieve();
+        securedService.retrieve();
     }
 
     // TEST CHANGE
-    @Test(expected = UnauthenticatedException.class)
     //UnauthenticatedException per SHIRO-146
-    public void testChange_asAnonymous() throws Exception {
-        SECURED_SERVICE.change();
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void testChange_asUser() throws Exception {
-        loginAsUser();
-        SECURED_SERVICE.change();
+    @Test
+    void testChange_asAnonymous() throws Exception {
+        assertThrows(UnauthenticatedException.class, () -> {
+            securedService.change();
+        });
     }
 
     @Test
-    public void testChange_asAdmin() throws Exception {
+    void testChange_asUser() throws Exception {
+        assertThrows(UnauthorizedException.class, () -> {
+            loginAsUser();
+            securedService.change();
+        });
+    }
+
+    @Test
+    void testChange_asAdmin() throws Exception {
         loginAsAdmin();
-        SECURED_SERVICE.change();
+        securedService.change();
     }
 
     // TEST RETRIEVE RESTRICTED
-    @Test(expected = UnauthenticatedException.class)
     //UnauthenticatedException per SHIRO-146
-    public void testRetrieveRestricted_asAnonymous() throws Exception {
-        RESTRICTED_SERVICE.retrieve();
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void testRetrieveRestricted_asUser() throws Exception {
-        loginAsUser();
-        RESTRICTED_SERVICE.retrieve();
+    @Test
+    void testRetrieveRestricted_asAnonymous() throws Exception {
+        assertThrows(UnauthenticatedException.class, () -> {
+            restrictedService.retrieve();
+        });
     }
 
     @Test
-    public void testRetrieveRestricted_asAdmin() throws Exception {
+    void testRetrieveRestricted_asUser() throws Exception {
+        assertThrows(UnauthorizedException.class, () -> {
+            loginAsUser();
+            restrictedService.retrieve();
+        });
+    }
+
+    @Test
+    void testRetrieveRestricted_asAdmin() throws Exception {
         loginAsAdmin();
-        RESTRICTED_SERVICE.retrieve();
+        restrictedService.retrieve();
     }
 
 }

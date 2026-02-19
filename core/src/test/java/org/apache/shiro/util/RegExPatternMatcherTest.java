@@ -18,10 +18,10 @@
  */
 package org.apache.shiro.util;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
-import java.util.regex.Pattern;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for the {@link RegExPatternMatcher}.
@@ -31,13 +31,45 @@ import java.util.regex.Pattern;
 public class RegExPatternMatcherTest {
 
     @Test
-    public void testSimplePattern() {
-        PatternMatcher pm = new RegExPatternMatcher();
-        String pattern = "a*b";
-        String test = "aaaaaaab";
-        //not necessary for the test, but Idea performs auto validation when it sees this:
-        Pattern.compile(pattern);
-        assertTrue(pm.matches(pattern, test));
+    void testSimplePattern() {
+        assertPatternMatch("a*b", "aaaaaaab");
     }
 
+    @Test
+    void testMatchesWithCarriageReturn() {
+        assertPatternMatch(".*", "/blah\n");
+    }
+
+    @Test
+    void testMatchesWithLineFeed() {
+        assertPatternMatch(".*", "/blah\r");
+    }
+
+    @Test
+    void testCaseInsensitive() {
+        RegExPatternMatcher pm = new RegExPatternMatcher();
+        pm.setCaseInsensitive(true);
+        assertPatternMatch("/blah", "/BlaH", pm);
+    }
+
+    @Test
+    void testCaseSensitive() {
+        assertPatternNotMatch("/blah", "/BlaH");
+    }
+
+    private void assertPatternMatch(String pattern, String path) {
+        assertPatternMatch(pattern, path, new RegExPatternMatcher());
+    }
+
+    private void assertPatternMatch(String pattern, String path, PatternMatcher pm) {
+        assertTrue(pm.matches(pattern, path), "Expected path '" + path + "' to match pattern '" + pattern + "'");
+    }
+
+    private void assertPatternNotMatch(String pattern, String path) {
+        assertPatternNotMatch(pattern, path, new RegExPatternMatcher());
+    }
+
+    private void assertPatternNotMatch(String pattern, String path, PatternMatcher pm) {
+        assertFalse(pm.matches(pattern, path), "Expected path '" + path + "' to NOT match pattern '" + pattern + "'");
+    }
 }

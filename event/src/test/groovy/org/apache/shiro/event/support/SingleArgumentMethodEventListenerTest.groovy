@@ -18,11 +18,11 @@
  */
 package org.apache.shiro.event.support
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import java.lang.reflect.Method
 
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 
 /**
  * @since 1.3
@@ -68,7 +68,7 @@ class SingleArgumentMethodEventListenerTest {
             Method getMethod() {
                 //sneakily swap out the valid method with an erroneous one.  This wouldn't ever happen normally, we're
                 //just doing this as a test harness:
-                return Object.class.getMethods()[0] //any method will do
+                return SimpleSubscriber.class.getMethods()[0] //any method will do
             }
         }
 
@@ -91,12 +91,12 @@ class SingleArgumentMethodEventListenerTest {
         assertTrue listener.accepts(new FooEvent(this))
     }
 
-    @Test(expected=IllegalArgumentException)
+    @Test
     void testNonPublicMethodSubscriber() {
         def target = new InvalidMethodModifierSubscriber()
         def method = InvalidMethodModifierSubscriber.class.getDeclaredMethods().find { it.name == "onEvent" }
 
-        new SingleArgumentMethodEventListener(target, method)
+        assertThrows(IllegalArgumentException.class, { new SingleArgumentMethodEventListener(target, method) })
     }
 
 

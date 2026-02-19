@@ -39,20 +39,19 @@ import java.util.Map;
  * </pre>
  * <h3>Multi-Realm Environments</h3>
  * If your application uses multiple realms, the {@code Map} methods reflect
- * the the aggregate principals from <em>all</em> realms that authenticated the owning {@code Subject}.
+ * the aggregate principals from <em>all</em> realms that authenticated the owning {@code Subject}.
  * <p/>
  * But in these multi-realm environments, it is often convenient or necessary to acquire only the principals contributed
  * by a specific realm (often in a realm implementation itself).  This {@code PrincipalMap} interface satisfies
  * those needs by providing additional realm-specific accessor/mutator methods.
  *
- * @author Les Hazlewood
  * @since 1.2
  */
-public interface PrincipalMap extends PrincipalCollection, Map<String,Object> {
+public interface PrincipalMap extends PrincipalCollection, Map<String, Object> {
 
-    Map<String,Object> getRealmPrincipals(String realmName);
+    Map<String, Object> getRealmPrincipals(String realmName);
 
-    Map<String,Object> setRealmPrincipals(String realmName, Map<String,Object> principals);
+    Map<String, Object> setRealmPrincipals(String realmName, Map<String, Object> principals);
 
     Object setRealmPrincipal(String realmName, String principalName, Object principal);
 

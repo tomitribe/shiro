@@ -19,6 +19,7 @@
 package org.apache.shiro.web.env;
 
 import org.apache.shiro.env.Environment;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
@@ -36,7 +37,7 @@ public interface WebEnvironment extends Environment {
      * is not available.
      *
      * @return the web application's {@code FilterChainResolver} if one has been configured or {@code null} if one
-     *         is not available.
+     * is not available.
      */
     FilterChainResolver getFilterChainResolver();
 
@@ -54,4 +55,14 @@ public interface WebEnvironment extends Environment {
      * @return the web application's security manager instance.
      */
     WebSecurityManager getWebSecurityManager();
+
+
+    /**
+     * Returns the configuration object used to configure the ShiroFilter.
+     *
+     * @return the configuration object used to configure the ShiroFilter.
+     */
+    default ShiroFilterConfiguration getShiroFilterConfiguration() {
+        return new ShiroFilterConfiguration();
+    }
 }

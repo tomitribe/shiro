@@ -26,14 +26,17 @@ import org.apache.shiro.crypto.hash.format.DefaultHashFormatFactory;
 import org.apache.shiro.crypto.hash.format.HashFormat;
 import org.apache.shiro.crypto.hash.format.HashFormatFactory;
 import org.apache.shiro.crypto.hash.format.ParsableHashFormat;
+import org.apache.shiro.crypto.hash.format.Shiro1CryptFormat;
 import org.apache.shiro.crypto.hash.format.Shiro2CryptFormat;
 import org.apache.shiro.lang.util.ByteSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.MessageDigest;
+import java.util.HashMap;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.shiro.crypto.hash.SimpleHashProvider.Parameters.PARAMETER_ITERATIONS;
 
 /**
  * Default implementation of the {@link PasswordService} interface that relies on an internal
@@ -47,15 +50,21 @@ import static java.util.Objects.requireNonNull;
  */
 public class DefaultPasswordService implements HashingPasswordService {
 
+    /**
+     * default hash algorithm.
+     */
     public static final String DEFAULT_HASH_ALGORITHM = "argon2id";
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultPasswordService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPasswordService.class);
 
     private HashService hashService;
     private HashFormat hashFormat;
     private HashFormatFactory hashFormatFactory;
 
-    private volatile boolean hashFormatWarned; //used to avoid excessive log noise
+    /**
+     * used to avoid excessive log noise
+     */
+    private volatile boolean hashFormatWarned;
 
     /**
      * Constructs a new PasswordService with a default hash service and the default
@@ -105,7 +114,13 @@ public class DefaultPasswordService implements HashingPasswordService {
             }
         }
 
-        return saved.matchesPassword(plaintextBytes);
+        if (hashFormat instanceof Shiro1CryptFormat) {
+            HashRequest request = createHashRequestShiro1Compatibility(plaintextBytes, saved);
+            Hash computed = hashService.computeHash(request);
+            return constantEquals(saved.toString(), computed.toString());
+        } else {
+            return saved.matchesPassword(plaintextBytes);
+        }
     }
 
     private boolean constantEquals(String savedHash, String computedHash) {
@@ -122,20 +137,44 @@ public class DefaultPasswordService implements HashingPasswordService {
 
             HashFormat format = this.hashFormat;
 
-            if (!(format instanceof ParsableHashFormat) && log.isWarnEnabled()) {
-                String msg = "The configured hashFormat instance [" + format.getClass().getName() + "] is not a " +
-                        ParsableHashFormat.class.getName() + " implementation.  This is " +
-                        "required if you wish to support backwards compatibility for saved password checking (almost " +
-                        "always desirable).  Without a " + ParsableHashFormat.class.getSimpleName() + " instance, " +
-                        "any hashService configuration changes will break previously hashed/saved passwords.";
-                log.warn(msg);
+            if (!(format instanceof ParsableHashFormat) && LOGGER.isWarnEnabled()) {
+                String msg = "The configured hashFormat instance [" + format.getClass().getName() + "] is not a "
+                        + ParsableHashFormat.class.getName() + " implementation.  This is "
+                        + "required if you wish to support backwards compatibility for saved password checking (almost "
+                        + "always desirable).  Without a " + ParsableHashFormat.class.getSimpleName() + " instance, "
+                        + "any hashService configuration changes will break previously hashed/saved passwords.";
+                LOGGER.warn(msg);
                 this.hashFormatWarned = true;
             }
         }
     }
 
     protected HashRequest createHashRequest(ByteSource plaintext) {
-        return new HashRequest.Builder().setSource(plaintext).build();
+        return new HashRequest.Builder().setSource(plaintext)
+                .setAlgorithmName(getHashService().getDefaultAlgorithmName())
+                .build();
+    }
+
+    /**
+     * Creates a HashRequest that is compatible with Shiro 1.x password hashing behavior by
+     * using the saved password hash's parameters.
+     * Salt is no longer applicable for stronger algorithms used by default in Shiro 2.x+,
+     * but this method is retained for compatibility with Shiro 1.x hashed passwords.
+     *
+     * @param plaintext the plaintext to hash
+     * @param saved    the saved hash
+     * @return the HashRequest
+     */
+    protected HashRequest createHashRequestShiro1Compatibility(ByteSource plaintext, Hash saved) {
+        var parameters = new HashMap<>(getHashService().getParameters());
+        parameters.put(PARAMETER_ITERATIONS, saved.getIterations());
+        //keep everything from the saved hash except for the source:
+        return new HashRequest.Builder().setSource(plaintext)
+                //now use the existing saved data:
+                .setAlgorithmName(saved.getAlgorithmName())
+                .setSalt(saved.getSalt())
+                .withParameters(parameters)
+                .build();
     }
 
     protected ByteSource createByteSource(Object o) {

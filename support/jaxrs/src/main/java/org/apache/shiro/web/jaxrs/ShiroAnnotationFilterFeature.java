@@ -32,40 +32,56 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.FeatureContext;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+
+import static org.apache.shiro.web.jaxrs.SubjectPrincipalRequestFilter.SHIRO_WEB_JAXRS_DISABLE_PRINCIPAL_PARAM;
 
 /**
  * Wraps {@link AuthorizationFilter filters} around JAX-RS resources that are annotated with Shiro annotations.
+ *
  * @since 1.4
  */
 public class ShiroAnnotationFilterFeature implements DynamicFeature {
 
-    private static List<Class<? extends Annotation>> shiroAnnotations = Collections.unmodifiableList(Arrays.asList(
+    private static final List<Class<? extends Annotation>> SHIRO_ANNOTATIONS = List.of(
             RequiresPermissions.class,
             RequiresRoles.class,
             RequiresAuthentication.class,
             RequiresUser.class,
-            RequiresGuest.class));
+            RequiresGuest.class);
+
+    private static final List<Class<? extends Annotation>> JSR_250_ANNOTATIONS = List.of(
+            RolesAllowed.class, PermitAll.class, DenyAll.class);
 
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
+        List<Annotation> authzSpecs = new ArrayList<>();
+        var annotations = SHIRO_ANNOTATIONS;
+        if (Boolean.TRUE.equals(context.getConfiguration().getProperty(SHIRO_WEB_JAXRS_DISABLE_PRINCIPAL_PARAM))) {
+            annotations = Stream.concat(SHIRO_ANNOTATIONS.stream(), JSR_250_ANNOTATIONS.stream())
+                    .collect(Collectors.toList());
+        }
 
-        List<Annotation> authzSpecs = new ArrayList<Annotation>();
-
-        for (Class<? extends Annotation> annotationClass : shiroAnnotations) {
+        for (Class<? extends Annotation> annotationClass : annotations) {
             // XXX What is the performance of getAnnotation vs getAnnotations?
             Annotation classAuthzSpec = resourceInfo.getResourceClass().getAnnotation(annotationClass);
             Annotation methodAuthzSpec = resourceInfo.getResourceMethod().getAnnotation(annotationClass);
 
-            if (classAuthzSpec != null) authzSpecs.add(classAuthzSpec);
-            if (methodAuthzSpec != null) authzSpecs.add(methodAuthzSpec);
+            if (classAuthzSpec != null) {
+                authzSpecs.add(classAuthzSpec);
+            }
+            if (methodAuthzSpec != null) {
+                authzSpecs.add(methodAuthzSpec);
+            }
         }
 
         if (!authzSpecs.isEmpty()) {
             context.register(new AnnotationAuthorizationFilter(authzSpecs), Priorities.AUTHORIZATION);
         }
     }
-
 }

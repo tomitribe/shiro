@@ -19,39 +19,47 @@
 package org.apache.shiro.spring.security.interceptor;
 
 import org.apache.shiro.authz.UnauthenticatedException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * All the tests in the parent class are run.  This class only exists to ensure that a
  * DefaultAutoProxyCreator Spring AOP environment exists and enables annotations correctly as
- * documented in the Spring reference manual: 
+ * documented in the Spring reference manual:
  * <a href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/aop-api.html#aop-autoproxy">
  * Using the &quot;autoproxy&quot; facility</a>.
  *
  * @since 1.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 public class DapcAuthorizationAnnotationTest extends AbstractAuthorizationAnnotationTest {
 
-    @Test(expected = UnauthenticatedException.class)
-    public void testGuestInterfaceFailure() {
-        bindUser();
-        testService.guestInterface();
+    @Test
+    void testGuestInterfaceFailure() {
+        assertThrows(UnauthenticatedException.class, () -> {
+            bindUser();
+            testService.guestInterface();
+        });
     }
 
-    @Test(expected = UnauthenticatedException.class)
-    public void testUserInterfaceFailure() {
-        bindGuest();
-        testService.userInterface();
+    @Test
+    void testUserInterfaceFailure() {
+        assertThrows(UnauthenticatedException.class, () -> {
+            bindGuest();
+            testService.userInterface();
+        });
     }
 
-    @Test(expected = UnauthenticatedException.class)
-    public void testAuthenticatedInterfaceFailure() {
-        bindGuest();
-        testService.authenticatedInterface();
+    @Test
+    void testAuthenticatedInterfaceFailure() {
+        assertThrows(UnauthenticatedException.class, () -> {
+            bindGuest();
+            testService.authenticatedInterface();
+        });
     }
 }

@@ -20,8 +20,8 @@ package org.apache.shiro.web.filter.mgt;
 
 import org.apache.shiro.util.AntPathMatcher;
 import org.apache.shiro.web.WebTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,10 +32,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,13 +49,13 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
 
     private PathMatchingFilterChainResolver resolver;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         resolver = new PathMatchingFilterChainResolver();
     }
 
     @Test
-    public void testNewInstance() {
+    void testNewInstance() {
         assertNotNull(resolver.getPathMatcher());
         assertTrue(resolver.getPathMatcher() instanceof AntPathMatcher);
         assertNotNull(resolver.getFilterChainManager());
@@ -63,7 +63,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
     }
 
     @Test
-    public void testNewInstanceWithFilterConfig() {
+    void testNewInstanceWithFilterConfig() {
         FilterConfig mock = createNiceMockFilterConfig();
         resolver = new PathMatchingFilterChainResolver(mock);
         assertNotNull(resolver.getPathMatcher());
@@ -74,7 +74,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
     }
 
     @Test
-    public void testSetters() {
+    void testSetters() {
         resolver.setPathMatcher(new AntPathMatcher());
         assertNotNull(resolver.getPathMatcher());
         assertTrue(resolver.getPathMatcher() instanceof AntPathMatcher);
@@ -84,7 +84,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
     }
 
     @Test
-    public void testGetChainsWithoutChains() {
+    void testGetChainsWithoutChains() {
         ServletRequest request = mock(HttpServletRequest.class);
         ServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -93,7 +93,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
     }
 
     @Test
-    public void testGetChainsWithMatch() {
+    void testGetChainsWithMatch() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -108,9 +108,9 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
         assertNotNull(resolved);
         verify(request).getServletPath();
     }
-    
+
     @Test
-    public void testPathTraversalWithDot() {
+    void testPathTraversalWithDot() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -125,9 +125,9 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
         assertNotNull(resolved);
         verify(request).getServletPath();
     }
-    
+
     @Test
-    public void testPathTraversalWithDotDot() {
+    void testPathTraversalWithDotDot() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -143,7 +143,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
     }
 
     @Test
-    public void testGetChainsWithoutMatch() {
+    void testGetChainsWithoutMatch() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -163,7 +163,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
      * Test asserting <a href="https://issues.apache.org/jira/browse/SHIRO-682">SHIRO-682<a/>.
      */
     @Test
-    public void testGetChain() {
+    void testGetChain() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -183,7 +183,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
      * Test asserting <a href="https://issues.apache.org/jira/browse/SHIRO-742">SHIRO-742<a/>.
      */
     @Test
-    public void testGetChainEqualUrlSeparator() {
+    void testGetChainEqualUrlSeparator() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -203,7 +203,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
      * Test asserting <a href="https://issues.apache.org/jira/browse/SHIRO-682">SHIRO-682<a/>.
      */
     @Test
-    public void testGetChainEndWithUrlSeparator() {
+    void testGetChainEndWithUrlSeparator() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -223,7 +223,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
      * Test asserting <a href="https://issues.apache.org/jira/browse/SHIRO-682">SHIRO-682<a/>.
      */
     @Test
-    public void testGetChainEndWithMultiUrlSeparator() {
+    void testGetChainEndWithMultiUrlSeparator() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -240,7 +240,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
     }
 
     @Test
-    public void testMultipleChainsPathEndsWithSlash() {
+    void testMultipleChainsPathEndsWithSlash() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -260,7 +260,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
      * Test asserting <a href="https://issues.apache.org/jira/browse/SHIRO-825">SHIRO-825<a/>.
      */
     @Test
-    public void testGetChainWhenPathEndsWithSlash() {
+    void testGetChainWhenPathEndsWithSlash() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
@@ -280,7 +280,7 @@ public class PathMatchingFilterChainResolverTest extends WebTest {
      * Test asserting <a href="https://issues.apache.org/jira/browse/SHIRO-825">SHIRO-825<a/>.
      */
     @Test
-    public void testGetChainWhenPathDoesNotEndWithSlash() {
+    void testGetChainWhenPathDoesNotEndWithSlash() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);

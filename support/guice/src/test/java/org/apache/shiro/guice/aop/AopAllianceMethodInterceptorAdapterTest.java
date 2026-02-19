@@ -21,15 +21,20 @@ package org.apache.shiro.guice.aop;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.shiro.aop.MethodInterceptor;
 import org.easymock.IAnswer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertSame;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.getCurrentArguments;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 
 public class AopAllianceMethodInterceptorAdapterTest {
     @Test
-    public void testInvoke() throws Throwable {
+    void testInvoke() throws Throwable {
         MethodInvocation allianceInvocation = createMock(MethodInvocation.class);
         MethodInterceptor mockShiroInterceptor = createMock(MethodInterceptor.class);
         expect(mockShiroInterceptor.invoke(anyObject(AopAllianceMethodInvocationAdapter.class))).andAnswer(new IAnswer<Object>() {
@@ -46,7 +51,7 @@ public class AopAllianceMethodInterceptorAdapterTest {
         Object invocation = underTest.invoke(allianceInvocation);
         Object value = ((AopAllianceMethodInvocationAdapter) invocation).proceed();
 
-        assertSame("Adapter invocation returned a different value.", expectedValue, value);
+        assertSame(expectedValue, value, "Adapter invocation returned a different value.");
 
         verify(mockShiroInterceptor, allianceInvocation);
     }

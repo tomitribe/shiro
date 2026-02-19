@@ -1,12 +1,14 @@
 Contributing to Apache Shiro
-=======================================
+============================
 
 Summary
 -------
-This document covers how to contribute to the Apache Shiro project. These instructions assume you have a GitHub.com account, so if you don't have one you will have to create one. Your proposed code changes will be published to your own fork of the Apache Shiro project and you will submit a Pull Request for your changes to be added.
 
-_Lets get started!!!_
+This document covers how to contribute to the Apache Shiro project.
+These instructions assume you have a GitHub.com account, so if you don't have one you will have to create one.
+Your proposed code changes will be published to your own fork of the Apache Shiro project and you will submit a Pull Request for your changes to be added.
 
+_Let's get started!!!_
 
 Fork the code
 -------------
@@ -20,7 +22,7 @@ You will paste this URL when doing the following `git clone` command.
 
 On your computer, follow these steps to setup a local repository for working on Apache Shiro:
 
-``` bash
+```bash
 $ git clone https://github.com/YOUR_ACCOUNT/shiro.git
 $ cd shiro
 $ git remote add upstream https://github.com/apache/shiro.git
@@ -28,7 +30,6 @@ $ git checkout main
 $ git fetch upstream
 $ git rebase upstream/main
 ```
-
 
 Making changes
 --------------
@@ -39,7 +40,7 @@ will be pushed to your forked repository on GitHub.  Once this branch is on your
 
 It is best practice to create a new branch each time you want to contribute to the project and only track the changes for that pull request in this branch.
 
-``` bash
+```bash
 $ git checkout -b feature_x
    (make your changes)
 $ git status
@@ -50,12 +51,11 @@ $ git commit -a -m "descriptive commit message for your changes"
 > The `-b` specifies that you want to create a new branch called `feature_x`.  You only specify `-b` the first time you checkout because you are creating a new branch.  
 > Once the `feature_x` branch exists, you can later switch to it with only `git checkout feature_x`.
 
-
 Rebase `feature_x` to include updates from `upstream/main`
-------------------------------------------------------------
+----------------------------------------------------------
 
-It is important that you maintain an up-to-date `main` branch in your local repository.  This is done by rebasing in the code changes from `upstream/main` 
-(the official Apache Shiro project repository) into your local repository.  You will want to do this before you start working on a feature as well as right 
+It is important that you maintain an up-to-date `main` branch in your local repository.  This is done by rebasing in the code changes from `upstream/main`
+(the official Apache Shiro project repository) into your local repository.  You will want to do this before you start working on a feature as well as right
 before you submit your changes as a pull request.  I recommend you do this process periodically while you work to make sure you are working off the most recent project code.
 
 This process will do the following:
@@ -64,7 +64,7 @@ This process will do the following:
 2. Synchronize your local `main` branch with the `upstream/main` so you have all the latest changes from the project
 3. Rebase the latest project code into your `feature_x` branch so it is up-to-date with the upstream code
 
-``` bash
+```bash
 $ git checkout main
 $ git fetch upstream
 $ git rebase upstream/main
@@ -74,16 +74,15 @@ $ git rebase main
 
 > Now your `feature_x` branch is up-to-date with all the code in `upstream/main`.
 
-
 Make a GitHub Pull Request to contribute your changes
 -----------------------------------------------------
 
-When you are happy with your changes and you are ready to contribute them, you will create a Pull Request on GitHub to do so.  This is done by pushing your local changes 
+When you are happy with your changes and you are ready to contribute them, you will create a Pull Request on GitHub to do so.  This is done by pushing your local changes
 to your forked repository (default remote name is `origin`) and then initiating a pull request on GitHub.
 
 > **IMPORTANT:** Make sure you have rebased your `feature_x` branch to include the latest code from `upstream/main` _before_ you do this.
 
-``` bash
+```bash
 $ git push origin main
 $ git push origin feature_x
 ```
@@ -100,18 +99,17 @@ To initiate the pull request, do the following:
 If you are requested to make modifications to your proposed changes, make the changes locally on your `feature_x` branch, re-push the `feature_x` branch to your fork.  
 The existing pull request should automatically pick up the change and update accordingly.
 
-
 Cleaning up after a successful pull request
 -------------------------------------------
 
-Once the `feature_x` branch has been committed into the `upstream/main` branch, your local `feature_x` branch and the `origin/feature_x` branch are no longer needed. 
+Once the `feature_x` branch has been committed into the `upstream/main` branch, your local `feature_x` branch and the `origin/feature_x` branch are no longer needed.
 If you want to make additional changes, restart the process with a new branch.
 
 > **IMPORTANT:** Make sure that your changes are in `upstream/main` before you delete your `feature_x` and `origin/feature_x` branches!
 
 You can delete these deprecated branches with the following:
 
-``` bash
+```bash
 $ git checkout main
 $ git branch -D feature_x
 $ git push origin :feature_x

@@ -18,12 +18,13 @@
   ~ under the License.
   -->
 <!--suppress osmorcNonOsgiMavenDependency -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.apache.shiro.samples</groupId>
         <artifactId>shiro-samples</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>999-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -64,14 +65,14 @@
             </activation>
             <build>
                 <plugins>
-                   <plugin>
-                       <groupId>org.apache.maven.plugins</groupId>
-                       <artifactId>maven-failsafe-plugin</artifactId>
-                       <configuration>
-                           <excludes>
-                               <exclude>**/ContainerIntegrationIT.java</exclude>
-                           </excludes>
-                       </configuration>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/ContainerIntegrationIT.java</exclude>
+                            </excludes>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -106,17 +107,12 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.htmlunit</groupId>
+            <groupId>org.htmlunit</groupId>
             <artifactId>htmlunit</artifactId>
             <scope>test</scope>
         </dependency>

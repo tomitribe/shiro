@@ -22,13 +22,13 @@ package org.apache.shiro.crypto.cipher
 import org.apache.shiro.lang.codec.CodecSupport
 import org.apache.shiro.lang.util.ByteSource
 import org.apache.shiro.lang.util.Destroyable
-import org.apache.shiro.util.ByteUtils
+import org.apache.shiro.lang.util.ByteUtils
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import java.security.Security
 
-import static org.junit.Assert.assertTrue
+import static org.junit.jupiter.api.Assertions.assertTrue
 
 /**
  * Test class for the AesCipherService class.
@@ -38,8 +38,8 @@ import static org.junit.Assert.assertTrue
 class AesCipherServiceTest {
 
     private static final String[] PLAINTEXTS = [
-        "Hello, this is a test.",
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            "Hello, this is a test.",
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
     ]
 
     AesCipherServiceTest() {

@@ -18,12 +18,15 @@
  */
 package org.apache.shiro.crypto.hash;
 
+import java.util.Map;
+import static org.apache.shiro.crypto.hash.SimpleHashProvider.Parameters;
+
 /**
  * A {@code HashService} hashes input sources utilizing a particular hashing strategy.
  * <p/>
  * A {@code HashService} sits at a higher architectural level than Shiro's simple {@link Hash} classes:  it allows
  * for salting and iteration-related strategies to be configured and internalized in a
- * single component that can be re-used in multiple places in the application.
+ * single component that can be reused in multiple places in the application.
  * <p/>
  * For example, for the most secure hashes, it is highly recommended to use a randomly generated salt, potentially
  * paired with an configuration-specific private salt, in addition to using multiple hash iterations.
@@ -56,7 +59,7 @@ public interface HashService {
      * Computes a hash based on the given request.
      *
      * <h3>Salt Notice</h3>
-     *
+     * <p>
      * If a salt accompanies the return value
      * (i.e. <code>returnedHash.{@link org.apache.shiro.crypto.hash.Hash#getSalt() getSalt()} != null</code>), this
      * same exact salt <b><em>MUST</em></b> be presented back to the {@code HashService} if hash
@@ -74,4 +77,43 @@ public interface HashService {
      * @see Hash#getSalt()
      */
     Hash computeHash(HashRequest request);
+
+    /**
+     * @return Default algorithm name for this hash service
+     * @since 2.0
+     */
+    String getDefaultAlgorithmName();
+
+    /**
+     * Returns the various parameters that will be used when computing hashes.
+     * This method exists primarily to support Shiro 1.x password hashing
+     * strategies what may need salts, iteration counts, or other parameters.
+     * <br><br>
+     * Each hashing algorithm may expect different parameters to be present in the returned map,
+     * or ignore the parameters altogether.
+     *
+     * @see HashRequest#getParameters()
+     * @see Parameters
+     *
+     * @return the various parameters that will be used when computing hashes.
+     */
+    default Map<String, Object> getParameters() {
+        return Map.of();
+    }
+
+    /**
+     * Sets the various parameters that will be used when computing hashes.
+     * <br><br>
+     * For example, if Shiro 1.x password hashing strategies are being used, this method
+     * may be used to supply salts, iteration counts, or other parameters.
+     * <br><br>
+     * Each hashing algorithm may expect different parameters to be present in the provided map,
+     * or ignore the parameters altogether.
+     * Shiro 2.x built-in hashing algorithms will ignore these parameters, which is why
+     * the method is defined with an empty default implementation.
+     * @see Parameters
+     *
+     * @param parameters the various parameters that will be used when computing hashes.
+     */
+    default void setParameters(Map<String, Object> parameters) { }
 }

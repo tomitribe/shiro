@@ -21,10 +21,11 @@ package org.apache.shiro.crypto.cipher;
 
 import org.apache.shiro.lang.util.ByteSource;
 import org.apache.shiro.lang.util.Destroyable;
-import org.apache.shiro.util.ByteSourceWrapper;
-import org.apache.shiro.util.ByteUtils;
 
 import java.io.IOException;
+
+import org.apache.shiro.lang.util.ByteSourceWrapper;
+import org.apache.shiro.lang.util.ByteUtils;
 
 /**
  * A simple implementation that maintains cipher service, ciphertext and key for decrypting it later.
@@ -34,7 +35,7 @@ public class SimpleByteSourceBroker implements ByteSourceBroker, Destroyable {
     private JcaCipherService cipherService;
     private byte[] ciphertext;
     private byte[] key;
-    private boolean destroyed = false;
+    private boolean destroyed;
 
     public SimpleByteSourceBroker(JcaCipherService cipherService, byte[] ciphertext, byte[] key) {
         this.cipherService = cipherService;
@@ -58,7 +59,8 @@ public class SimpleByteSourceBroker implements ByteSourceBroker, Destroyable {
 
     public byte[] getClonedBytes() {
         ByteSource byteSource = cipherService.decryptInternal(ciphertext, key);
-        return byteSource.getBytes(); // this's a newly created byte array
+        // this's a newly created byte array
+        return byteSource.getBytes();
     }
 
     public void destroy() throws Exception {

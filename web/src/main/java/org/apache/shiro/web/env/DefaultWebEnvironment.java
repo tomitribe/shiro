@@ -20,6 +20,7 @@ package org.apache.shiro.web.env;
 
 import org.apache.shiro.env.DefaultEnvironment;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 
@@ -34,8 +35,11 @@ import java.util.Map;
 public class DefaultWebEnvironment extends DefaultEnvironment implements MutableWebEnvironment {
 
     private static final String DEFAULT_FILTER_CHAIN_RESOLVER_NAME = "filterChainResolver";
+    private static final String SHIRO_FILTER_CONFIG_NAME = "shiroFilter";
 
     private ServletContext servletContext;
+
+    private ShiroFilterConfiguration filterConfiguration;
 
     public DefaultWebEnvironment() {
         super();
@@ -63,7 +67,7 @@ public class DefaultWebEnvironment extends DefaultEnvironment implements Mutable
     public WebSecurityManager getWebSecurityManager() {
         SecurityManager sm = super.getSecurityManager();
         assertWebSecurityManager(sm);
-        return (WebSecurityManager)sm;
+        return (WebSecurityManager) sm;
     }
 
     public void setWebSecurityManager(WebSecurityManager wsm) {
@@ -83,5 +87,22 @@ public class DefaultWebEnvironment extends DefaultEnvironment implements Mutable
 
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
+    }
+
+
+    @Override
+    public void setShiroFilterConfiguration(ShiroFilterConfiguration filterConfiguration) {
+        setObject(SHIRO_FILTER_CONFIG_NAME, filterConfiguration);
+    }
+
+    @Override
+    public ShiroFilterConfiguration getShiroFilterConfiguration() {
+        ShiroFilterConfiguration config = getObject(SHIRO_FILTER_CONFIG_NAME, ShiroFilterConfiguration.class);
+        // Use the default configuration if config is null
+        if (config == null) {
+            config = MutableWebEnvironment.super.getShiroFilterConfiguration();
+            setShiroFilterConfiguration(config);
+        }
+        return config;
     }
 }

@@ -27,29 +27,40 @@ import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.util.ThreadContext;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import java.util.UUID;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit test for the {@link DefaultSessionManager DefaultSessionManager} implementation.
  */
+@Isolated
 public class DefaultSessionManagerTest {
 
-    DefaultSessionManager sm = null;
+    DefaultSessionManager sm;
 
-    @Before
+    @BeforeEach
     public void setup() {
         ThreadContext.remove();
         sm = new DefaultSessionManager();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         sm.destroy();
         ThreadContext.remove();
@@ -63,8 +74,9 @@ public class DefaultSessionManagerTest {
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
-    public void testGlobalTimeout() {
+    void testGlobalTimeout() {
         long timeout = 1000;
         sm.setGlobalSessionTimeout(timeout);
         Session session = sm.start(null);
@@ -74,7 +86,7 @@ public class DefaultSessionManagerTest {
     }
 
     @Test
-    public void testSessionListenerStartNotification() {
+    void testSessionListenerStartNotification() {
         final boolean[] started = new boolean[1];
         SessionListener listener = new SessionListenerAdapter() {
             public void onStart(Session session) {
@@ -87,7 +99,7 @@ public class DefaultSessionManagerTest {
     }
 
     @Test
-    public void testSessionListenerStopNotification() {
+    void testSessionListenerStopNotification() {
         final boolean[] stopped = new boolean[1];
         SessionListener listener = new SessionListenerAdapter() {
             public void onStop(Session session) {
@@ -104,13 +116,13 @@ public class DefaultSessionManagerTest {
     //Ensures that a session attribute can be accessed in the listener without
     //causing a stack overflow exception.
     @Test
-    public void testSessionListenerStopNotificationWithReadAttribute() {
+    void testSessionListenerStopNotificationWithReadAttribute() {
         final boolean[] stopped = new boolean[1];
         final String[] value = new String[1];
         SessionListener listener = new SessionListenerAdapter() {
             public void onStop(Session session) {
                 stopped[0] = true;
-                value[0] = (String)session.getAttribute("foo");
+                value[0] = (String) session.getAttribute("foo");
             }
         };
         sm.getSessionListeners().add(listener);
@@ -123,8 +135,9 @@ public class DefaultSessionManagerTest {
         assertEquals("bar", value[0]);
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
-    public void testSessionListenerExpiredNotification() {
+    void testSessionListenerExpiredNotification() {
         final boolean[] expired = new boolean[1];
         SessionListener listener = new SessionListenerAdapter() {
             public void onExpiration(Session session) {
@@ -144,8 +157,9 @@ public class DefaultSessionManagerTest {
         assertTrue(expired[0]);
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
-    public void testSessionDeleteOnExpiration() {
+    void testSessionDeleteOnExpiration() {
         sm.setGlobalSessionTimeout(100);
 
         SessionDAO sessionDAO = createMock(SessionDAO.class);
@@ -155,7 +169,7 @@ public class DefaultSessionManagerTest {
         final SimpleSession session1 = new SimpleSession();
         session1.setId(sessionId1);
 
-        final Session[] activeSession = new SimpleSession[]{session1};
+        final Session[] activeSession = new SimpleSession[] {session1};
         sm.setSessionFactory(new SessionFactory() {
             public Session createSession(SessionContext initData) {
                 return activeSession[0];
@@ -181,7 +195,8 @@ public class DefaultSessionManagerTest {
         sleep(20);
 
         expect(sessionDAO.readSession(sessionId1)).andReturn(session1);
-        sessionDAO.update(eq(session1)); //update's the stop timestamp
+        //update's the stop timestamp
+        sessionDAO.update(eq(session1));
         sessionDAO.delete(session1);
         replay(sessionDAO);
 
@@ -193,14 +208,15 @@ public class DefaultSessionManagerTest {
             //expected
         }
 
-        verify(sessionDAO); //verify that the delete call was actually made on the DAO
+        //verify that the delete call was actually made on the DAO
+        verify(sessionDAO);
     }
 
     /**
      * Tests a bug introduced by SHIRO-443, where a custom sessionValidationScheduler would not be started.
      */
     @Test
-    public void testEnablingOfCustomSessionValidationScheduler() {
+    void testEnablingOfCustomSessionValidationScheduler() {
 
         // using the default impl of sessionValidationScheduler, as the but effects any scheduler we set directly via
         // sessionManager.setSessionValidationScheduler(), commonly used in INI configuration.
@@ -213,9 +229,8 @@ public class DefaultSessionManagerTest {
             Session session = sessionManager.start(null);
 
             // now sessionValidationScheduler should be enabled
-            assertTrue("sessionValidationScheduler was not enabled", sessionValidationScheduler.isEnabled());
-        }
-        finally {
+            assertTrue(sessionValidationScheduler.isEnabled(), "sessionValidationScheduler was not enabled");
+        } finally {
             // cleanup after test
             sessionManager.destroy();
         }
@@ -230,7 +245,7 @@ public class DefaultSessionManagerTest {
 
         private final long timeout;
 
-        public SessionTimeoutMatcher(long timeout) {
+        SessionTimeoutMatcher(long timeout) {
             this.timeout = timeout;
         }
 

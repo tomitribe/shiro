@@ -17,37 +17,41 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.apache.shiro.integrationtests</groupId>
-		<artifactId>shiro-integration-tests</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>org.apache.shiro.integrationtests</groupId>
+        <artifactId>shiro-integration-tests</artifactId>
+        <version>999-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>shiro-its-support</artifactId>
-	<name>Apache Shiro :: ITs :: Support</name>
+    <artifactId>shiro-its-support</artifactId>
+    <name>Apache Shiro :: ITs :: Support</name>
+    <properties>
+        <module.name>its.support</module.name>
+    </properties>
 
-	<dependencies>
-	    <dependency>
+    <dependencies>
+        <dependency>
             <groupId>org.apache.taglibs</groupId>
             <artifactId>taglibs-standard-spec</artifactId>
             <scope>compile</scope>
-	    </dependency>
-	    <dependency>
+        </dependency>
+        <dependency>
             <groupId>org.apache.taglibs</groupId>
             <artifactId>taglibs-standard-impl</artifactId>
             <scope>compile</scope>
-	    </dependency>
-	    <dependency>
-	        <groupId>javax.servlet</groupId>
-	        <artifactId>javax.servlet-api</artifactId>
-	        <scope>provided</scope>
-	    </dependency>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -56,14 +60,14 @@
             <scope>runtime</scope>
         </dependency>
 
-	    <dependency>
-	        <groupId>org.slf4j</groupId>
-	        <artifactId>jcl-over-slf4j</artifactId>
-	        <scope>runtime</scope>
-	    </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
-            <groupId>net.sourceforge.htmlunit</groupId>
+            <groupId>org.htmlunit</groupId>
             <artifactId>htmlunit</artifactId>
         </dependency>
         <dependency>
@@ -89,7 +93,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.mjeanroy</groupId>
-            <artifactId>junit-servers-jetty</artifactId>
+            <artifactId>junit-servers-jetty-9</artifactId>
             <!-- Exclude Jetty 9.2 artifacts -->
             <exclusions>
                 <exclusion>
@@ -115,21 +119,21 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>compile</scope>
         </dependency>
 
-		<!-- dependency on the Base64 class
-		     in 2.0 this is split out, so this dep will be removed
-		     in the future
-		 -->
-		<dependency>
-			<groupId>org.apache.shiro</groupId>
-			<artifactId>shiro-core</artifactId>
-		</dependency>
+        <!-- dependency on the Base64 class
+             in 2.0 this is split out, so this dep will be removed
+             in the future
+         -->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 </project>

@@ -21,10 +21,10 @@ package org.apache.shiro.crypto.cipher
 
 import org.apache.shiro.lang.codec.CodecSupport
 import org.apache.shiro.lang.util.ByteSource
-import org.apache.shiro.util.ByteUtils
-import org.junit.Test
+import org.apache.shiro.lang.util.ByteUtils
+import org.junit.jupiter.api.Test
 
-import static org.junit.Assert.assertTrue
+import static org.junit.jupiter.api.Assertions.assertTrue
 
 /**
  * Test cases for the {@link org.apache.shiro.crypto.cipher.BlowfishCipherService} class.
@@ -34,8 +34,8 @@ import static org.junit.Assert.assertTrue
 public class BlowfishCipherServiceTest {
 
     private static final String[] PLAINTEXTS = [
-        "Hello, this is a test.",
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            "Hello, this is a test.",
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
     ];
 
     @Test

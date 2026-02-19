@@ -31,24 +31,32 @@ import org.apache.shiro.env.Environment;
 import org.apache.shiro.event.EventBus;
 import org.apache.shiro.event.EventBusAware;
 import org.apache.shiro.event.Subscribe;
+import org.apache.shiro.lang.util.Destroyable;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.lang.util.Destroyable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import java.util.Collection;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Isolated("System property usage")
 public class ShiroModuleTest {
 
     @Test
-    public void basicInstantiation() {
+    void basicInstantiation() {
 
         final MockRealm mockRealm = createMock(MockRealm.class);
 
@@ -68,7 +76,7 @@ public class ShiroModuleTest {
     }
 
     @Test
-    public void testConfigure() {
+    void testConfigure() {
         final MockRealm mockRealm = createMock(MockRealm.class);
         AuthenticationToken authToken = createMock(AuthenticationToken.class);
         AuthenticationInfo info = new SimpleAuthenticationInfo("mockUser", "password", "mockRealm");
@@ -100,7 +108,7 @@ public class ShiroModuleTest {
     }
 
     @Test
-    public void testBindSecurityManager() {
+    void testBindSecurityManager() {
         final MockRealm mockRealm = createMock(MockRealm.class);
 
         Injector injector = Guice.createInjector(new ShiroModule() {
@@ -125,7 +133,7 @@ public class ShiroModuleTest {
     }
 
     @Test
-    public void testBindSessionManager() {
+    void testBindSessionManager() {
         final MockRealm mockRealm = createMock(MockRealm.class);
 
         Injector injector = Guice.createInjector(new ShiroModule() {
@@ -151,7 +159,7 @@ public class ShiroModuleTest {
     }
 
     @Test
-    public void testBindEnvironment() {
+    void testBindEnvironment() {
         final MockRealm mockRealm = createMock(MockRealm.class);
 
         Injector injector = Guice.createInjector(new ShiroModule() {
@@ -177,7 +185,7 @@ public class ShiroModuleTest {
     }
 
     @Test
-    public void testDestroy() throws Exception {
+    void testDestroy() throws Exception {
         final MockRealm mockRealm = createMock(MockRealm.class);
         final MyDestroyable myDestroyable = createMock(MyDestroyable.class);
 
@@ -207,11 +215,11 @@ public class ShiroModuleTest {
     }
 
     /**
-     * @since 1.4
      * @throws Exception
+     * @since 1.4
      */
     @Test
-    public void testEventListener() throws Exception {
+    void testEventListener() throws Exception {
 
         final MockRealm mockRealm = createMock(MockRealm.class);
         final EventBus eventBus = createMock(EventBus.class);
@@ -249,11 +257,11 @@ public class ShiroModuleTest {
     }
 
     /**
-     * @since 1.4
      * @throws Exception
+     * @since 1.4
      */
     @Test
-    public void testEventBusAware() throws Exception {
+    void testEventBusAware() throws Exception {
 
         final MockRealm mockRealm = createMock(MockRealm.class);
 
@@ -279,10 +287,10 @@ public class ShiroModuleTest {
         MockEventBusAware eventBusAware = injector.getInstance(MockEventBusAware.class);
 
         assertSame(eventBus, eventBusAware.eventBus);
-        assertSame(eventBus, ((DefaultSecurityManager)securityManager).getEventBus());
+        assertSame(eventBus, ((DefaultSecurityManager) securityManager).getEventBus());
     }
 
-    public static interface MockRealm extends Realm {
+    public interface MockRealm extends Realm {
 
     }
 
@@ -303,17 +311,19 @@ public class ShiroModuleTest {
         }
     }
 
-    public static interface MyDestroyable extends Destroyable {
+    public interface MyDestroyable extends Destroyable {
     }
 
     public static class MockEventListener1 {
         @Subscribe
-        public void listenToAllAndDoNothing(Object o) {}
+        public void listenToAllAndDoNothing(Object o) {
+        }
     }
 
     public static class MockEventListener2 {
         @Subscribe
-        public void listenToAllAndDoNothing(Object o) {}
+        public void listenToAllAndDoNothing(Object o) {
+        }
     }
 
     public static class MockEventBusAware implements EventBusAware {

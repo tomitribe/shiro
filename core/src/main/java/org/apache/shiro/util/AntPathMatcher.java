@@ -69,6 +69,7 @@ public class AntPathMatcher implements PatternMatcher {
     public static final String DEFAULT_PATH_SEPARATOR = "/";
 
     private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+    private boolean caseInsensitive;
 
 
     /**
@@ -79,8 +80,20 @@ public class AntPathMatcher implements PatternMatcher {
         this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
     }
 
+    @Override
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    @Override
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        this.caseInsensitive = caseInsensitive;
+    }
+
     /**
-     * Checks if {@code path} is a pattern (i.e. contains a '*', or '?'). For example the {@code /foo/**} would return {@code true}, while {@code /bar/} would return {@code false}.
+     * Checks if {@code path} is a pattern (i.e. contains a '*', or '?').
+     * For example the {@code /foo/**} would return {@code true}, while {@code /bar/} would return {@code false}.
+     *
      * @param path the string to check
      * @return this method returns {@code true} if {@code path} contains a '*' or '?', otherwise, {@code false}
      */
@@ -103,7 +116,6 @@ public class AntPathMatcher implements PatternMatcher {
         return doMatch(pattern, path, false);
     }
 
-
     /**
      * Actually match the given <code>path</code> against the given <code>pattern</code>.
      *
@@ -112,8 +124,10 @@ public class AntPathMatcher implements PatternMatcher {
      * @param fullMatch whether a full pattern match is required
      *                  (else a pattern match as far as the given base path goes is sufficient)
      * @return <code>true</code> if the supplied <code>path</code> matched,
-     *         <code>false</code> if it didn't
+     * <code>false</code> if it didn't
      */
+    @SuppressWarnings({"checkstyle:ReturnCount", "checkstyle:CyclomaticComplexity",
+            "checkstyle:NPathComplexity", "checkstyle:MethodLength"})
     protected boolean doMatch(String pattern, String path, boolean fullMatch) {
         if (path == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
             return false;
@@ -143,18 +157,18 @@ public class AntPathMatcher implements PatternMatcher {
         if (pathIdxStart > pathIdxEnd) {
             // Path is exhausted, only match if rest of pattern is * or **'s
             if (pattIdxStart > pattIdxEnd) {
-                return (pattern.endsWith(this.pathSeparator) ?
-                        path.endsWith(this.pathSeparator) : !path.endsWith(this.pathSeparator));
+                return (pattern.endsWith(this.pathSeparator)
+                        ? path.endsWith(this.pathSeparator) : !path.endsWith(this.pathSeparator));
             }
             if (!fullMatch) {
                 return true;
             }
-            if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") &&
-                    path.endsWith(this.pathSeparator)) {
+            if (pattIdxStart == pattIdxEnd && "*".equals(pattDirs[pattIdxStart])
+                    && path.endsWith(this.pathSeparator)) {
                 return true;
             }
             for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
-                if (!pattDirs[i].equals("**")) {
+                if (!"**".equals(pattDirs[i])) {
                     return false;
                 }
             }
@@ -249,8 +263,10 @@ public class AntPathMatcher implements PatternMatcher {
      * @param str     string which must be matched against the pattern.
      *                Must not be <code>null</code>.
      * @return <code>true</code> if the string matches against the
-     *         pattern, or <code>false</code> otherwise.
+     * pattern, or <code>false</code> otherwise.
      */
+    @SuppressWarnings({"checkstyle:ReturnCount", "checkstyle:CyclomaticComplexity",
+            "checkstyle:NPathComplexity", "checkstyle:MethodLength"})
     private boolean matchStrings(String pattern, String str) {
         char[] patArr = pattern.toCharArray();
         char[] strArr = str.toCharArray();
@@ -271,31 +287,33 @@ public class AntPathMatcher implements PatternMatcher {
         if (!containsStar) {
             // No '*'s, so we make a shortcut
             if (patIdxEnd != strIdxEnd) {
-                return false; // Pattern and string do not have the same size
+                // Pattern and string do not have the same size
+                return false;
             }
             for (int i = 0; i <= patIdxEnd; i++) {
                 ch = patArr[i];
-                if (ch != '?') {
-                    if (ch != strArr[i]) {
-                        return false;// Character mismatch
-                    }
+                if (ch != '?' && checkCase(ch) != checkCase(strArr[i])) {
+                    // Character mismatch
+                    return false;
                 }
             }
-            return true; // String matches against pattern
+            // String matches against pattern
+            return true;
         }
 
 
         if (patIdxEnd == 0) {
-            return true; // Pattern contains only '*', which matches anything
+            // Pattern contains only '*', which matches anything
+            return true;
         }
 
         // Process characters before first star
         while ((ch = patArr[patIdxStart]) != '*' && strIdxStart <= strIdxEnd) {
-            if (ch != '?') {
-                if (ch != strArr[strIdxStart]) {
-                    return false;// Character mismatch
-                }
+            if (ch != '?' && checkCase(ch) != checkCase(strArr[strIdxStart])) {
+                // Character mismatch
+                return false;
             }
+
             patIdxStart++;
             strIdxStart++;
         }
@@ -312,11 +330,11 @@ public class AntPathMatcher implements PatternMatcher {
 
         // Process characters after last star
         while ((ch = patArr[patIdxEnd]) != '*' && strIdxStart <= strIdxEnd) {
-            if (ch != '?') {
-                if (ch != strArr[strIdxEnd]) {
-                    return false;// Character mismatch
-                }
+            if (ch != '?' && checkCase(ch) != checkCase(strArr[strIdxEnd])) {
+                // Character mismatch
+                return false;
             }
+
             patIdxEnd--;
             strIdxEnd--;
         }
@@ -355,10 +373,8 @@ public class AntPathMatcher implements PatternMatcher {
             for (int i = 0; i <= strLength - patLength; i++) {
                 for (int j = 0; j < patLength; j++) {
                     ch = patArr[patIdxStart + j + 1];
-                    if (ch != '?') {
-                        if (ch != strArr[strIdxStart + i + j]) {
-                            continue strLoop;
-                        }
+                    if (ch != '?' && checkCase(ch) != checkCase(strArr[strIdxStart + i + j])) {
+                        continue strLoop;
                     }
                 }
 
@@ -423,5 +439,7 @@ public class AntPathMatcher implements PatternMatcher {
         return builder.toString();
     }
 
-
+    private char checkCase(char ch) {
+        return isCaseInsensitive() ? Character.toLowerCase(ch) : ch;
+    }
 }

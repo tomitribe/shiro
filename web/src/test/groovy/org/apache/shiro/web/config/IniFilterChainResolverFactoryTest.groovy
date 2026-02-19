@@ -21,6 +21,8 @@ package org.apache.shiro.web.config
 import org.apache.shiro.web.filter.InvalidRequestFilter
 import org.apache.shiro.web.filter.mgt.DefaultFilter
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.parallel.Isolated
 
 import javax.servlet.Filter
 import javax.servlet.FilterConfig
@@ -29,11 +31,10 @@ import org.apache.shiro.config.Ini
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter
 import org.apache.shiro.web.filter.authz.SslFilter
 import org.apache.shiro.web.filter.mgt.FilterChainResolver
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 import static org.hamcrest.MatcherAssert.assertThat
 
 /**
@@ -41,6 +42,7 @@ import static org.hamcrest.MatcherAssert.assertThat
  *
  * @since 1.2
  */
+@Isolated
 class IniFilterChainResolverFactoryTest {
 
     private IniFilterChainResolverFactory factory;
@@ -52,7 +54,7 @@ class IniFilterChainResolverFactoryTest {
         return mock
     }
 
-    @Before
+    @BeforeEach
     void setUp() {
         this.factory = new IniFilterChainResolverFactory()
     }
@@ -119,13 +121,13 @@ class IniFilterChainResolverFactoryTest {
         factory = new IniFilterChainResolverFactory(ini)
         FilterConfig config = createNiceMockFilterConfig()
         factory.setFilterConfig(config)
-        
+
         replay config
-        
+
         FilterChainResolver resolver = factory.getInstance();
-        
+
         assertNotNull resolver
-        
+
         verify config
     }
 
@@ -144,7 +146,7 @@ class IniFilterChainResolverFactoryTest {
         def defaults = ['filter': new FormAuthenticationFilter()]
 
         def extractedFilters = factory.getFilters(null, defaults)
-        
+
         assertNotNull extractedFilters
         assertEquals 1, extractedFilters.size()
         assertTrue extractedFilters['filter'] instanceof FormAuthenticationFilter
@@ -194,7 +196,8 @@ class IniFilterChainResolverFactoryTest {
         FilterChainResolver resolver = factory.getInstance()
         assertNotNull resolver
 
-        def invalidRequestFilter = resolver.filterChainManager.getChain("/index.html").get(0) // this will be the invalidRequest filter
+        def invalidRequestFilter = resolver.filterChainManager.getChain("/index.html").get(0)
+        // this will be the invalidRequest filter
 
         assertThat(invalidRequestFilter, Matchers.instanceOf(InvalidRequestFilter))
         assertThat("blockSemicolon should be false", invalidRequestFilter.blockBackslash)

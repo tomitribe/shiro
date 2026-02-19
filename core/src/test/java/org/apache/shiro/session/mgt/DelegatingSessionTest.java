@@ -20,31 +20,33 @@ package org.apache.shiro.session.mgt;
 
 import org.apache.shiro.session.ExpiredSessionException;
 import org.apache.shiro.util.ThreadContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import java.io.Serializable;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit test for the {@link DelegatingSession} class.
  */
+@Isolated
 public class DelegatingSessionTest {
 
-    DelegatingSession session = null;
-    DefaultSessionManager sm = null;
+    DelegatingSession session;
+    DefaultSessionManager sm;
 
-    @Before
+    @BeforeEach
     public void setup() {
         ThreadContext.remove();
         sm = new DefaultSessionManager();
         this.session = new DelegatingSession(sm, new DefaultSessionKey(sm.start(null).getId()));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         sm.destroy();
         ThreadContext.remove();
@@ -58,10 +60,11 @@ public class DelegatingSessionTest {
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
-    public void testTimeout() {
+    void testTimeout() {
         Serializable origId = session.getId();
-        assertEquals(session.getTimeout(), AbstractSessionManager.DEFAULT_GLOBAL_SESSION_TIMEOUT);
+        assertEquals(AbstractSessionManager.DEFAULT_GLOBAL_SESSION_TIMEOUT, session.getTimeout());
         session.touch();
         session.setTimeout(100);
         assertEquals(100, session.getTimeout());

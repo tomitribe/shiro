@@ -19,16 +19,18 @@
 package org.apache.shiro.web;
 
 import groovy.lang.Closure;
+import org.apache.shiro.web.util.WebUtils;
 
 import java.io.Closeable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
+@SuppressWarnings("checkstyle:LineLength")
 /**
  * Wrapper that will restore System properties after test methods.
- *
- * Based on: https://github.com/stefanbirkner/system-rules/blob/master/src/main/java/org/junit/contrib/java/lang/system/RestoreSystemProperties.java
+ * <p>
+ * Based on: <a href="https://github.com/stefanbirkner/system-rules/blob/master/src/main/java/org/junit/contrib/java/lang/system/RestoreSystemProperties.java">...</a>
  */
 public class RestoreSystemProperties implements Closeable {
 
@@ -41,6 +43,7 @@ public class RestoreSystemProperties implements Closeable {
 
     public void restore() {
         System.setProperties(originalProperties);
+        WebUtils.reloadSystemProperties();
     }
 
     private Properties copyOf(Properties source) {
@@ -57,7 +60,7 @@ public class RestoreSystemProperties implements Closeable {
 
         try (RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties()) {
             properties.forEach(System::setProperty);
-
+            WebUtils.reloadSystemProperties();
             return closure.call();
         }
     }

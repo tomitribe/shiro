@@ -27,20 +27,19 @@ import org.apache.shiro.web.filter.mgt.DefaultFilter
 import org.apache.shiro.web.filter.mgt.DefaultFilterChainManager
 import org.apache.shiro.web.filter.mgt.NamedFilterList
 import org.apache.shiro.web.servlet.AbstractShiroFilter
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = [ShiroWebAutoConfigurationTestApplication, Config])
-
 class ConfiguredGlobalFiltersTest {
 
     @Configuration
@@ -76,7 +75,7 @@ class ConfiguredGlobalFiltersTest {
 
         // default config set
         assertThat filterChainManager.globalFilterNames, contains(DefaultFilter.invalidRequest.name(),
-                                                                  DefaultFilter.port.name())
+                DefaultFilter.port.name())
         // default route configured
         NamedFilterList allChain = filterChainManager.getChain("/**")
         assertThat allChain, contains(
@@ -85,7 +84,8 @@ class ConfiguredGlobalFiltersTest {
 
         InvalidRequestFilter invalidRequest = allChain.get(0)
         assertThat "Expected invalidRequest.blockBackslash to be false", !invalidRequest.isBlockBackslash()
-        PortFilter portFilter = allChain.get(1) // an ugly line, but we want to make sure that we can override the filters
+        PortFilter portFilter = allChain.get(1)
+        // an ugly line, but we want to make sure that we can override the filters
         // defined in Shiro's DefaultFilter
         assertThat portFilter.port, equalTo(9999)
 

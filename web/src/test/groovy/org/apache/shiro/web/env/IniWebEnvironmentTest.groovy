@@ -24,10 +24,10 @@ import org.apache.shiro.config.ogdl.SimpleBean
 import org.apache.shiro.web.filter.mgt.DefaultFilter
 import org.apache.shiro.web.filter.mgt.FilterChainManager
 import org.hamcrest.Matchers
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 
 /**
  * Unit tests for the {@link IniWebEnvironment} implementation.
@@ -41,19 +41,19 @@ class IniWebEnvironmentTest {
      */
     @Test
     void testObjectsAfterSecurityManagerCreation() {
-        
+
         def ini = new Ini()
         ini.load("""
         [main]
         compositeBean = org.apache.shiro.config.ogdl.CompositeBean
         """)
-        
-        def env = new IniWebEnvironment(ini:  ini)
+
+        def env = new IniWebEnvironment(ini: ini)
         env.init()
 
         assertNotNull env.objects
-        //asserts that the objects size = securityManager (1) + the event bus (1) + filterChainResolverFactory (1) + num custom objects + num default filters
-        def expectedSize = 4 + DefaultFilter.values().length
+        //asserts that the objects size = securityManager (1) + the event bus (1) + filterChainResolverFactory (1) + filterConfig (1) + num custom objects + num default filters
+        def expectedSize = 5 + DefaultFilter.values().length
         assertEquals expectedSize, env.objects.size()
         assertNotNull env.objects['securityManager']
         assertNotNull env.objects['compositeBean']
@@ -84,10 +84,11 @@ class IniWebEnvironmentTest {
         env.init()
 
         assertNotNull env.objects
-        //asserts that the objects size = securityManager (1) + the event bus (1) + filterChainResolverFactory (1) + num custom objects + num default filters
-        def expectedSize = 5 + DefaultFilter.values().length
+        //asserts that the objects size = securityManager (1) + the event bus (1) + filterChainResolverFactory (1) + shiroFilter (1) + num custom objects + num default filters
+        def expectedSize = 6 + DefaultFilter.values().length
         assertEquals expectedSize, env.objects.size()
         assertNotNull env.objects['securityManager']
+        assertNotNull env.objects['shiroFilter']
 
         def compositeBean = (CompositeBean) env.objects['compositeBean']
         def simpleBean = (SimpleBean) env.objects['simpleBean']
@@ -109,7 +110,7 @@ class IniWebEnvironmentTest {
         /index.html = anon
         """)
 
-        def env = new IniWebEnvironment(ini:  ini)
+        def env = new IniWebEnvironment(ini: ini)
         env.init()
         assertThat env.getFilterChainResolver().filterChainManager.globalFilterNames, Matchers.empty()
     }
@@ -124,9 +125,9 @@ class IniWebEnvironmentTest {
         /index.html = anon
         """)
 
-        def env = new IniWebEnvironment(ini:  ini)
+        def env = new IniWebEnvironment(ini: ini)
         env.init()
-        def resolver =  env.getFilterChainResolver()
+        def resolver = env.getFilterChainResolver()
         FilterChainManager manager = resolver.filterChainManager
         assertThat manager.globalFilterNames, Matchers.contains(DefaultFilter.invalidRequest.name())
 
@@ -147,9 +148,9 @@ class IniWebEnvironmentTest {
         /index.html = authc
         """)
 
-        def env = new IniWebEnvironment(ini:  ini)
+        def env = new IniWebEnvironment(ini: ini)
         env.init()
-        def resolver =  env.getFilterChainResolver()
+        def resolver = env.getFilterChainResolver()
         FilterChainManager manager = resolver.filterChainManager
         assertThat manager.globalFilterNames, Matchers.contains(
                 DefaultFilter.port.name(),

@@ -18,20 +18,23 @@
  */
 package org.apache.shiro.web.session;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
+import org.easymock.Capture;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpSession;
 
-import org.easymock.Capture;
-import org.junit.Before;
-import org.junit.Test;
+import static org.easymock.EasyMock.captureInt;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpServletSessionTest {
 
     private HttpSession mockSession;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         this.mockSession = createMock(HttpSession.class);
     }
@@ -42,8 +45,9 @@ public class HttpServletSessionTest {
      * @since 1.3
      */
     @Test
-    public void testLongTimeout() throws Exception {
-        final int expectedTimeoutInSeconds = 30 * 24 * 60 * 60;  // 30 days.
+    void testLongTimeout() throws Exception {
+        // 30 days.
+        final int expectedTimeoutInSeconds = 30 * 24 * 60 * 60;
         final long expectedLongValue = expectedTimeoutInSeconds * 1000L;
 
         Capture<Integer> capturedInt = Capture.newInstance();

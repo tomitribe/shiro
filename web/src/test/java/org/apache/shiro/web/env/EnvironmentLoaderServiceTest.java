@@ -20,8 +20,7 @@ package org.apache.shiro.web.env;
 
 import org.apache.shiro.config.ConfigurationException;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletContext;
 import java.util.Arrays;
@@ -30,9 +29,13 @@ import java.util.List;
 import static org.easymock.EasyMock.expect;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.mockito.Mockito.mock;
+
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,8 +45,8 @@ import static org.mockito.Mockito.when;
  */
 public class EnvironmentLoaderServiceTest {
 
-    @Test()
-    public void singleServiceTest() throws Exception {
+    @Test
+    void singleServiceTest() throws Exception {
 
         ServletContext servletContext = EasyMock.mock(ServletContext.class);
         expect(servletContext.getInitParameter("shiroEnvironmentClass")).andReturn(null);
@@ -63,8 +66,26 @@ public class EnvironmentLoaderServiceTest {
         assertThat(environmentStub.getServletContext(), sameInstance(servletContext));
     }
 
-    @Test()
-    public void multipleServiceTest() throws Exception {
+    @Test
+    void testDefaultWebEnvironment() {
+        ServletContext servletContext = EasyMock.mock(ServletContext.class);
+        expect(servletContext.getInitParameter("shiroEnvironmentClass"))
+                .andReturn(DefaultWebEnvironment.class.getName());
+        expect(servletContext.getInitParameter("shiroConfigLocations")).andReturn(null);
+
+        EasyMock.replay(servletContext);
+
+        WebEnvironment environment = new EnvironmentLoader().createEnvironment(servletContext);
+
+        EasyMock.verify(servletContext);
+
+        assertThat(environment, instanceOf(DefaultWebEnvironment.class));
+        assertThat(environment.getShiroFilterConfiguration(), is(notNullValue()));
+        assertThat(environment.getServletContext(), sameInstance(servletContext));
+    }
+
+    @Test
+    void multipleServiceTest() throws Exception {
 
         List<WebEnvironment> environmentList = Arrays.asList(new WebEnvironmentStub(), new WebEnvironmentStub());
 
@@ -76,7 +97,7 @@ public class EnvironmentLoaderServiceTest {
 
         try {
             environmentLoader.createEnvironment(servletContext);
-            Assert.fail("Expected ConfigurationException to be thrown");
+            fail("Expected ConfigurationException to be thrown");
         } catch (ConfigurationException e) {
             assertThat(e.getMessage(), stringContainsInOrder("zero or exactly one", "shiroEnvironmentClass"));
         }
@@ -85,11 +106,12 @@ public class EnvironmentLoaderServiceTest {
         verify(environmentLoader).doLoadWebEnvironmentsFromServiceLoader();
     }
 
-    @Test()
-    public void loadFromInitParamTest() throws Exception {
+    @Test
+    void loadFromInitParamTest() throws Exception {
 
         ServletContext servletContext = EasyMock.mock(ServletContext.class);
-        expect(servletContext.getInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM)).andReturn(WebEnvironmentStub.class.getName());
+        expect(servletContext.getInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM))
+                    .andReturn(WebEnvironmentStub.class.getName());
         expect(servletContext.getInitParameter("shiroConfigLocations")).andReturn(null);
 
         EasyMock.replay(servletContext);

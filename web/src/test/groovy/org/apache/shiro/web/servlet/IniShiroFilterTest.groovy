@@ -22,10 +22,10 @@ import javax.servlet.FilterConfig
 import javax.servlet.ServletContext
 import javax.servlet.ServletException
 import org.apache.shiro.lang.io.ResourceUtils
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 
 /**
  * Unit tests for the {@link IniShiroFilter} implementation.
@@ -41,8 +41,8 @@ class IniShiroFilterTest {
 
         expect(filterConfig.getServletContext()).andReturn(servletContext).anyTimes()
         expect(filterConfig.getInitParameter(eq(AbstractShiroFilter.STATIC_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INIT_PARAM_NAME))).andReturn null
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INI_PARAM_NAME))).andReturn null
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INI_PARAM_NAME))).andReturn null
         //simulate the servlet context resource of /WEB-INF/shiro.ini to be our test file above:
         expect(servletContext.getResourceAsStream(eq(IniShiroFilter.DEFAULT_WEB_INI_RESOURCE_PATH))).andReturn(inputStream)
 
@@ -61,8 +61,8 @@ class IniShiroFilterTest {
 
         expect(filterConfig.getServletContext()).andReturn(servletContext).anyTimes()
         expect(filterConfig.getInitParameter(eq(AbstractShiroFilter.STATIC_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INIT_PARAM_NAME))).andReturn "classpath:IniShiroFilterTest.ini"
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INI_PARAM_NAME))).andReturn null
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INI_PARAM_NAME))).andReturn "classpath:IniShiroFilterTest.ini"
 
         replay filterConfig, servletContext
 
@@ -80,8 +80,8 @@ class IniShiroFilterTest {
 
         expect(filterConfig.getServletContext()).andReturn(servletContext).anyTimes()
         expect(filterConfig.getInitParameter(eq(AbstractShiroFilter.STATIC_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INIT_PARAM_NAME))).andReturn nonExistentResource
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INI_PARAM_NAME))).andReturn null
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INI_PARAM_NAME))).andReturn nonExistentResource
         expect(servletContext.getResourceAsStream(eq(nonExistentResource))).andReturn(null)
 
         replay filterConfig, servletContext
@@ -104,8 +104,8 @@ class IniShiroFilterTest {
 
         expect(filterConfig.getServletContext()).andReturn servletContext
         expect(filterConfig.getInitParameter(eq(AbstractShiroFilter.STATIC_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(IniShiroFilter.CONFIG_INIT_PARAM_NAME)).andReturn null
-        expect(filterConfig.getInitParameter(IniShiroFilter.CONFIG_PATH_INIT_PARAM_NAME)).andReturn null
+        expect(filterConfig.getInitParameter(IniShiroFilter.CONFIG_INI_PARAM_NAME)).andReturn null
+        expect(filterConfig.getInitParameter(IniShiroFilter.CONFIG_PATH_INI_PARAM_NAME)).andReturn null
         expect(servletContext.getResourceAsStream(IniShiroFilter.DEFAULT_WEB_INI_RESOURCE_PATH)).andReturn null
 
         replay filterConfig, servletContext
@@ -127,8 +127,8 @@ class IniShiroFilterTest {
 
         expect(filterConfig.getServletContext()).andReturn(servletContext).anyTimes()
         expect(filterConfig.getInitParameter(eq(AbstractShiroFilter.STATIC_INIT_PARAM_NAME))).andReturn null
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INIT_PARAM_NAME))).andReturn config
-        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INIT_PARAM_NAME))).andReturn null
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_INI_PARAM_NAME))).andReturn config
+        expect(filterConfig.getInitParameter(eq(IniShiroFilter.CONFIG_PATH_INI_PARAM_NAME))).andReturn null
 
         replay filterConfig, servletContext
 

@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.shiro.config;
+package org.apache.shiro.config
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test
 
-
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*
+import static org.junit.jupiter.api.Assertions.*
 
 /**
  * Unit test for the {@link Ini} class.
@@ -36,8 +36,8 @@ public class IniTest {
     @Test
     public void testNoSections() {
         String test =
-            "prop1 = value1" + NL +
-                    "prop2 = value2";
+                "prop1 = value1" + NL +
+                        "prop2 = value2";
 
         Ini ini = new Ini();
         ini.load(test);
@@ -166,10 +166,10 @@ public class IniTest {
         assertEquals("*:*", kv[1])
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSplitKeyValueNoValue() {
         String test = "  Truth  ";
-        Ini.Section.splitKeyValue(test);
+        assertThrows(IllegalArgumentException.class, { Ini.Section.splitKeyValue(test) })
     }
 
     @Test

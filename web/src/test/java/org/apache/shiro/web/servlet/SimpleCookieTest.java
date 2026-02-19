@@ -18,30 +18,36 @@
  */
 package org.apache.shiro.web.servlet;
 
-import junit.framework.TestCase;
-import org.easymock.IArgumentMatcher;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Locale;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * TODO - Class JavaDoc
  *
  * @since Apr 22, 2010 9:40:47 PM
  */
-public class SimpleCookieTest extends TestCase {
+public class SimpleCookieTest {
 
     private SimpleCookie cookie;
 
     private HttpServletRequest mockRequest;
     private HttpServletResponse mockResponse;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         this.mockRequest = createMock(HttpServletRequest.class);
         this.mockResponse = createMock(HttpServletResponse.class);
@@ -71,7 +77,8 @@ public class SimpleCookieTest extends TestCase {
         assertTrue(headerValue.startsWith(expectedStart));
 
         expect(mockRequest.getContextPath()).andReturn(path).times(1);
-        mockResponse.addHeader(eq(SimpleCookie.COOKIE_HEADER_NAME), isA(String.class)); //can't calculate the date format in the test
+        //can't calculate the date format in the test
+        mockResponse.addHeader(eq(SimpleCookie.COOKIE_HEADER_NAME), isA(String.class));
         replay(mockRequest);
         replay(mockResponse);
 
@@ -92,7 +99,7 @@ public class SimpleCookieTest extends TestCase {
                 .append(SimpleCookie.HTTP_ONLY_ATTRIBUTE_NAME)
                 .append(SimpleCookie.ATTRIBUTE_DELIMITER)
                 .append(SimpleCookie.SAME_SITE_ATTRIBUTE_NAME).append(SimpleCookie.NAME_VALUE_DELIMITER)
-                    .append(Cookie.SameSiteOptions.LAX.toString().toLowerCase(Locale.ENGLISH))
+                .append(Cookie.SameSiteOptions.LAX.toString().toLowerCase(Locale.ENGLISH))
                 .toString();
 
         expect(mockRequest.getContextPath()).andReturn(contextPath);
@@ -123,7 +130,8 @@ public class SimpleCookieTest extends TestCase {
     @Test
     public void testReadValueInvalidPath() throws Exception {
         expect(mockRequest.getRequestURI()).andStubReturn("/foo/index.jsp");
-        expect(mockRequest.getCookies()).andStubReturn(new javax.servlet.http.Cookie[] { new javax.servlet.http.Cookie(this.cookie.getName(), "value") });
+        expect(mockRequest.getCookies()).andStubReturn(
+                new javax.servlet.http.Cookie[] {new javax.servlet.http.Cookie(this.cookie.getName(), "value")});
         replay(mockRequest);
         replay(mockResponse);
 
@@ -134,7 +142,8 @@ public class SimpleCookieTest extends TestCase {
     @Test
     public void testReadValuePrefixPath() throws Exception {
         expect(mockRequest.getRequestURI()).andStubReturn("/bar/index.jsp");
-        expect(mockRequest.getCookies()).andStubReturn(new javax.servlet.http.Cookie[] { new javax.servlet.http.Cookie(this.cookie.getName(), "value") });
+        expect(mockRequest.getCookies()).andStubReturn(
+                new javax.servlet.http.Cookie[] {new javax.servlet.http.Cookie(this.cookie.getName(), "value")});
         replay(mockRequest);
         replay(mockResponse);
 
@@ -145,34 +154,13 @@ public class SimpleCookieTest extends TestCase {
     @Test
     public void testReadValueInvalidPrefixPath() throws Exception {
         expect(mockRequest.getRequestURI()).andStubReturn("/foobar/index.jsp");
-        expect(mockRequest.getCookies()).andStubReturn(new javax.servlet.http.Cookie[] { new javax.servlet.http.Cookie(this.cookie.getName(), "value") });
+        expect(mockRequest.getCookies()).andStubReturn(
+                new javax.servlet.http.Cookie[] {new javax.servlet.http.Cookie(this.cookie.getName(), "value")});
         replay(mockRequest);
         replay(mockResponse);
 
         this.cookie.setPath("/foo");
-        assertEquals(null, this.cookie.readValue(mockRequest, mockResponse));
-    }
-
-    private static <T extends javax.servlet.http.Cookie> T eqCookie(final T in) {
-        reportMatcher(new IArgumentMatcher() {
-            public boolean matches(Object o) {
-                javax.servlet.http.Cookie c = (javax.servlet.http.Cookie) o;
-                return c.getName().equals(in.getName()) &&
-                        c.getValue().equals(in.getValue()) &&
-                        c.getPath().equals(in.getPath()) &&
-                        c.getMaxAge() == in.getMaxAge() &&
-                        c.getSecure() == in.getSecure() &&
-                        c.getValue().equals(in.getValue());
-            }
-
-            public void appendTo(StringBuffer sb) {
-                sb.append("eqCookie(");
-                sb.append(in.getClass().getName());
-                sb.append(")");
-
-            }
-        });
-        return null;
+        assertNull(this.cookie.readValue(mockRequest, mockResponse));
     }
 
 }

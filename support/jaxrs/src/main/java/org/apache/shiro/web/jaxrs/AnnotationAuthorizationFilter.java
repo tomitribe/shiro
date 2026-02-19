@@ -26,14 +26,19 @@ import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.shiro.authz.aop.AuthenticatedAnnotationHandler;
 import org.apache.shiro.authz.aop.AuthorizingAnnotationHandler;
+import org.apache.shiro.authz.aop.DenyAllAnnotationHandler;
 import org.apache.shiro.authz.aop.GuestAnnotationHandler;
 import org.apache.shiro.authz.aop.PermissionAnnotationHandler;
+import org.apache.shiro.authz.aop.PermitAllAnnotationHandler;
 import org.apache.shiro.authz.aop.RoleAnnotationHandler;
+import org.apache.shiro.authz.aop.RolesAllowedAnnotationHandler;
 import org.apache.shiro.authz.aop.UserAnnotationHandler;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -52,7 +57,8 @@ public class AnnotationAuthorizationFilter implements ContainerRequestFilter {
     private final Map<AuthorizingAnnotationHandler, Annotation> authzChecks;
 
     public AnnotationAuthorizationFilter(Collection<Annotation> authzSpecs) {
-        Map<AuthorizingAnnotationHandler, Annotation> authChecks = new HashMap<AuthorizingAnnotationHandler, Annotation>(authzSpecs.size());
+        Map<AuthorizingAnnotationHandler, Annotation> authChecks =
+                new HashMap<AuthorizingAnnotationHandler, Annotation>(authzSpecs.size());
         for (Annotation authSpec : authzSpecs) {
             authChecks.put(createHandler(authSpec), authSpec);
         }
@@ -61,12 +67,25 @@ public class AnnotationAuthorizationFilter implements ContainerRequestFilter {
 
     private static AuthorizingAnnotationHandler createHandler(Annotation annotation) {
         Class<?> t = annotation.annotationType();
-        if (RequiresPermissions.class.equals(t)) return new PermissionAnnotationHandler();
-        else if (RequiresRoles.class.equals(t)) return new RoleAnnotationHandler();
-        else if (RequiresUser.class.equals(t)) return new UserAnnotationHandler();
-        else if (RequiresGuest.class.equals(t)) return new GuestAnnotationHandler();
-        else if (RequiresAuthentication.class.equals(t)) return new AuthenticatedAnnotationHandler();
-        else throw new IllegalArgumentException("Cannot create a handler for the unknown for annotation " + t);
+        if (RequiresPermissions.class.equals(t)) {
+            return new PermissionAnnotationHandler();
+        } else if (RequiresRoles.class.equals(t)) {
+            return new RoleAnnotationHandler();
+        } else if (RequiresUser.class.equals(t)) {
+            return new UserAnnotationHandler();
+        } else if (RequiresGuest.class.equals(t)) {
+            return new GuestAnnotationHandler();
+        } else if (RequiresAuthentication.class.equals(t)) {
+            return new AuthenticatedAnnotationHandler();
+        } else if (RolesAllowed.class.equals(t)) {
+            return new RolesAllowedAnnotationHandler();
+        } else if (PermitAll.class.equals(t)) {
+            return new PermitAllAnnotationHandler();
+        } else if (DenyAll.class.equals(t)) {
+            return new DenyAllAnnotationHandler();
+        } else {
+            throw new IllegalArgumentException("Cannot create a handler for the unknown for annotation " + t);
+        }
     }
 
     @Override

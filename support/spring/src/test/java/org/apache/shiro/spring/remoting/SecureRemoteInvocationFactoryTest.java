@@ -23,30 +23,32 @@ import org.apache.shiro.session.mgt.DefaultSessionKey;
 import org.apache.shiro.session.mgt.SessionKey;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.util.ThreadContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.remoting.support.RemoteInvocation;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * //TODO - Class JavaDoc!
- *
  */
 public class SecureRemoteInvocationFactoryTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         ThreadContext.remove();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         ThreadContext.remove();
     }
@@ -62,7 +64,7 @@ public class SecureRemoteInvocationFactoryTest {
     }
 
     @Test
-    public void testSessionManagerProxyStartRemoteInvocation() throws Exception {
+    void testSessionManagerProxyStartRemoteInvocation() throws Exception {
 
         SecureRemoteInvocationFactory factory = new SecureRemoteInvocationFactory();
 
@@ -83,7 +85,7 @@ public class SecureRemoteInvocationFactoryTest {
     }
 
     @Test
-    public void testSessionManagerProxyNonStartRemoteInvocation() throws Exception {
+    void testSessionManagerProxyNonStartRemoteInvocation() throws Exception {
 
         SecureRemoteInvocationFactory factory = new SecureRemoteInvocationFactory();
 

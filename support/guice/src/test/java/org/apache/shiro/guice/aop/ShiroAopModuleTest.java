@@ -26,23 +26,47 @@ import com.google.inject.spi.Element;
 import com.google.inject.spi.Elements;
 import com.google.inject.spi.InterceptorBinding;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.apache.shiro.aop.*;
-import org.apache.shiro.authz.annotation.*;
-import org.apache.shiro.authz.aop.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.shiro.aop.AnnotationHandler;
+import org.apache.shiro.aop.AnnotationMethodInterceptor;
+import org.apache.shiro.aop.AnnotationResolver;
+import org.apache.shiro.aop.DefaultAnnotationResolver;
+import org.apache.shiro.aop.MethodInvocation;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresGuest;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.authz.annotation.RequiresUser;
+import org.apache.shiro.authz.aop.AuthenticatedAnnotationMethodInterceptor;
+import org.apache.shiro.authz.aop.GuestAnnotationMethodInterceptor;
+import org.apache.shiro.authz.aop.PermissionAnnotationMethodInterceptor;
+import org.apache.shiro.authz.aop.RoleAnnotationMethodInterceptor;
+import org.apache.shiro.authz.aop.UserAnnotationMethodInterceptor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ShiroAopModuleTest {
+
+    private Map<Class<? extends Annotation>, Method> protectedMethods;
+    private Map<Class<? extends Annotation>, Class<? extends AnnotationMethodInterceptor>> interceptorTypes;
+
     @Test
-    public void testGetAnnotationResolver() {
+    void testGetAnnotationResolver() {
 
         final AnnotationResolver annotationResolver = new DefaultAnnotationResolver();
 
@@ -87,7 +111,7 @@ public class ShiroAopModuleTest {
     }
 
     @Test
-    public void testBindShiroInterceptor() {
+    void testBindShiroInterceptor() {
 
 
         ShiroAopModule underTest = new ShiroAopModule() {
@@ -122,17 +146,18 @@ public class ShiroAopModuleTest {
                 List<MethodInterceptor> interceptors = binding.getInterceptors();
                 assertEquals(1, interceptors.size());
                 assertTrue(interceptors.get(0) instanceof AopAllianceMethodInterceptorAdapter);
-                assertTrue(interceptorTypes.get(theAnnotation).isInstance(((AopAllianceMethodInterceptorAdapter) interceptors.get(0)).shiroInterceptor));
+                assertTrue(interceptorTypes.get(theAnnotation)
+                                .isInstance(((AopAllianceMethodInterceptorAdapter) interceptors.get(0)).shiroInterceptor));
 
             }
         }
 
-        assertTrue("Not all interceptors were bound.", protectedMethods.isEmpty());
+        assertTrue(protectedMethods.isEmpty(), "Not all interceptors were bound.");
     }
 
     @Target({ElementType.TYPE, ElementType.METHOD})
     @Retention(RetentionPolicy.RUNTIME)
-    private static @interface MyTestAnnotation {
+    private @interface MyTestAnnotation {
     }
 
     private static class MyAnnotationHandler extends AnnotationHandler {
@@ -143,13 +168,13 @@ public class ShiroAopModuleTest {
          *
          * @param annotationClass the type of annotation this handler will process.
          */
-        public MyAnnotationHandler(Class<? extends Annotation> annotationClass) {
+        MyAnnotationHandler(Class<? extends Annotation> annotationClass) {
             super(annotationClass);
         }
     }
 
     private static class MyAnnotationMethodInterceptor extends AnnotationMethodInterceptor {
-        public MyAnnotationMethodInterceptor() {
+        MyAnnotationMethodInterceptor() {
             super(new MyAnnotationHandler(MyTestAnnotation.class));
         }
 
@@ -189,10 +214,7 @@ public class ShiroAopModuleTest {
 
     }
 
-    private Map<Class<? extends Annotation>, Method> protectedMethods;
-    private Map<Class<? extends Annotation>, Class<? extends AnnotationMethodInterceptor>> interceptorTypes;
-
-    @Before
+    @BeforeEach
     public void setup() throws NoSuchMethodException {
         protectedMethods = new HashMap<Class<? extends Annotation>, Method>();
         protectedMethods.put(RequiresRoles.class, getClass().getMethod("roleProtected"));

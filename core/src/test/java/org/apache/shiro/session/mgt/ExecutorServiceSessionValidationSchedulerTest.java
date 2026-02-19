@@ -19,17 +19,20 @@
 package org.apache.shiro.session.mgt;
 
 import org.apache.shiro.session.Session;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SuppressWarnings("checkstyle:MagicNumber")
 public class ExecutorServiceSessionValidationSchedulerTest {
 
     ExecutorServiceSessionValidationScheduler executorServiceSessionValidationScheduler;
     DefaultSessionManager defaultSessionManager;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         defaultSessionManager = new DefaultSessionManager();
         defaultSessionManager.setDeleteInvalidSessions(true);
@@ -41,40 +44,40 @@ public class ExecutorServiceSessionValidationSchedulerTest {
     }
 
     @Test
-    public void timeoutSessionValidate() throws InterruptedException {
+    void timeoutSessionValidate() throws InterruptedException {
         Session session = new SimpleSession();
         session.setTimeout(2000L);
         defaultSessionManager.create(session);
         Thread.sleep(5000L);
-        Assert.assertTrue(defaultSessionManager.getActiveSessions().isEmpty());
-        Assert.assertTrue(executorServiceSessionValidationScheduler.isEnabled());
+        assertTrue(defaultSessionManager.getActiveSessions().isEmpty());
+        assertTrue(executorServiceSessionValidationScheduler.isEnabled());
     }
 
     @Test
-    public void stopSessionValidate() throws InterruptedException {
+    void stopSessionValidate() throws InterruptedException {
         Session session = new SimpleSession();
         session.setTimeout(10000L);
         defaultSessionManager.create(session);
         Thread.sleep(1000L);
         session.stop();
         Thread.sleep(3000L);
-        Assert.assertTrue(defaultSessionManager.getActiveSessions().isEmpty());
-        Assert.assertTrue(executorServiceSessionValidationScheduler.isEnabled());
+        assertTrue(defaultSessionManager.getActiveSessions().isEmpty());
+        assertTrue(executorServiceSessionValidationScheduler.isEnabled());
     }
 
     @Test
-    public void enableSessionValidation() throws InterruptedException {
-        Assert.assertTrue(executorServiceSessionValidationScheduler.isEnabled());
+    void enableSessionValidation() throws InterruptedException {
+        assertTrue(executorServiceSessionValidationScheduler.isEnabled());
         executorServiceSessionValidationScheduler.disableSessionValidation();
         Thread.sleep(2000L);
-        Assert.assertFalse(executorServiceSessionValidationScheduler.isEnabled());
+        assertFalse(executorServiceSessionValidationScheduler.isEnabled());
         executorServiceSessionValidationScheduler.enableSessionValidation();
         Thread.sleep(2000L);
-        Assert.assertTrue(executorServiceSessionValidationScheduler.isEnabled());
+        assertTrue(executorServiceSessionValidationScheduler.isEnabled());
     }
 
     @Test
-    public void threadException() throws InterruptedException {
+    void threadException() throws InterruptedException {
         Session session = new SimpleSession();
         defaultSessionManager = new FakeDefaultSessionManager();
         defaultSessionManager.setDeleteInvalidSessions(true);
@@ -87,16 +90,16 @@ public class ExecutorServiceSessionValidationSchedulerTest {
         Thread.sleep(2000L);
         session.stop();
         Thread.sleep(2000L);
-        Assert.assertFalse(defaultSessionManager.getActiveSessions().isEmpty());
-        Assert.assertTrue(executorServiceSessionValidationScheduler.isEnabled());
+        assertFalse(defaultSessionManager.getActiveSessions().isEmpty());
+        assertTrue(executorServiceSessionValidationScheduler.isEnabled());
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         executorServiceSessionValidationScheduler.disableSessionValidation();
     }
 
-    private class FakeDefaultSessionManager extends DefaultSessionManager {
+    private static final class FakeDefaultSessionManager extends DefaultSessionManager {
         public void validateSessions() throws RuntimeException {
             throw new RuntimeException("Session test exception");
         }

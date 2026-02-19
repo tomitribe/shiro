@@ -22,16 +22,16 @@ import org.apache.shiro.config.ConfigurationException
 import org.apache.shiro.web.filter.authz.SslFilter
 import org.apache.shiro.web.servlet.ShiroFilter
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.BeforeEach
 
 import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.FilterConfig
 import javax.servlet.ServletContext
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 import static org.hamcrest.MatcherAssert.assertThat
 
 /**
@@ -41,7 +41,7 @@ class DefaultFilterChainManagerTest {
 
     DefaultFilterChainManager manager;
 
-    @Before
+    @BeforeEach
     void setUp() {
         this.manager = new DefaultFilterChainManager();
     }
@@ -111,14 +111,14 @@ class DefaultFilterChainManagerTest {
         assertEquals "roles", pair[0]
         assertEquals '"guest", "admin"', pair[1]
     }
-    
+
     //SHIRO-205
     @Test
     void testFilterChainConfigWithNestedCommas() {
         def chain = "a, b[c], d[e, f], g[h, i, j], k"
 
         String[] tokens = manager.splitChainDefinition(chain);
-        
+
         assertNotNull tokens
         assertEquals 5, tokens.length
         assertEquals "a", tokens[0]

@@ -20,6 +20,7 @@ package org.apache.shiro.spring.web.config;
 
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.filter.mgt.DefaultFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,9 @@ public class AbstractShiroWebFilterConfiguration {
     protected ShiroFilterChainDefinition shiroFilterChainDefinition;
 
     @Autowired(required = false)
+    protected ShiroFilterConfiguration shiroFilterConfiguration;
+
+    @Autowired(required = false)
     protected Map<String, Filter> filterMap;
 
     @Value("#{ @environment['shiro.loginUrl'] ?: '/login.jsp' }")
@@ -52,8 +56,17 @@ public class AbstractShiroWebFilterConfiguration {
     @Value("#{ @environment['shiro.unauthorizedUrl'] ?: null }")
     protected String unauthorizedUrl;
 
+    @Value("#{ @environment['shiro.caseInsensitive'] ?: false }")
+    protected boolean caseInsensitive;
+
     protected List<String> globalFilters() {
         return Collections.singletonList(DefaultFilter.invalidRequest.name());
+    }
+
+    protected ShiroFilterConfiguration shiroFilterConfiguration() {
+        return shiroFilterConfiguration != null
+                ? shiroFilterConfiguration
+                : new ShiroFilterConfiguration();
     }
 
     protected ShiroFilterFactoryBean shiroFilterFactoryBean() {
@@ -62,8 +75,10 @@ public class AbstractShiroWebFilterConfiguration {
         filterFactoryBean.setLoginUrl(loginUrl);
         filterFactoryBean.setSuccessUrl(successUrl);
         filterFactoryBean.setUnauthorizedUrl(unauthorizedUrl);
+        filterFactoryBean.setCaseInsensitive(caseInsensitive);
 
         filterFactoryBean.setSecurityManager(securityManager);
+        filterFactoryBean.setShiroFilterConfiguration(shiroFilterConfiguration());
         filterFactoryBean.setGlobalFilters(globalFilters());
         filterFactoryBean.setFilterChainDefinitionMap(shiroFilterChainDefinition.getFilterChainMap());
 

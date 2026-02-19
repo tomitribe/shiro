@@ -18,19 +18,22 @@
  */
 package org.apache.shiro.web.servlet
 
+import org.junit.jupiter.api.parallel.Isolated
+
 import javax.servlet.FilterConfig
 import javax.servlet.ServletContext
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.UnavailableSecurityManagerException
 import org.apache.shiro.web.mgt.WebSecurityManager
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 
 /**
  * Unit tests for the {@link AbstractShiroFilter} implementation.
  */
+@Isolated("Uses System Properties and Static Security Manager")
 class AbstractShiroFilterTest {
 
     @Test
@@ -75,7 +78,7 @@ class AbstractShiroFilterTest {
 
         replay securityManager, filterConfig, servletContext
 
-        AbstractShiroFilter filter = new AbstractShiroFilter(){}
+        AbstractShiroFilter filter = new AbstractShiroFilter() {}
         filter.securityManager = securityManager
 
         try {

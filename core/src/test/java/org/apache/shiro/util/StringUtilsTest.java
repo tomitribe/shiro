@@ -18,11 +18,12 @@
  */
 package org.apache.shiro.util;
 
-import static org.junit.Assert.*;
-
 import org.apache.shiro.lang.util.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @since 0.9
@@ -30,18 +31,18 @@ import org.junit.Test;
 public class StringUtilsTest {
 
     @Test
-    public void splitWithNullInput() {
+    void splitWithNullInput() {
         String line = null;
         String[] split = StringUtils.split(line);
         assertNull(split);
     }
 
     @Test
-    public void splitWithCommas() {
+    void splitWithCommas() {
         String line = "shall,we,play,a,game?";
         String[] split = StringUtils.split(line);
         assertNotNull(split);
-        assertTrue(split.length == 5);
+        assertEquals(5, split.length);
         assertEquals("shall", split[0]);
         assertEquals("we", split[1]);
         assertEquals("play", split[2]);
@@ -50,11 +51,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void splitWithCommasAndSpaces() {
+    void splitWithCommasAndSpaces() {
         String line = "shall,we ,    play, a,game?";
         String[] split = StringUtils.split(line);
         assertNotNull(split);
-        assertTrue(split.length == 5);
+        assertEquals(5, split.length);
         assertEquals("shall", split[0]);
         assertEquals("we", split[1]);
         assertEquals("play", split[2]);
@@ -63,11 +64,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void splitWithQuotedCommasAndSpaces() {
+    void splitWithQuotedCommasAndSpaces() {
         String line = "shall, \"we, play\", a, game?";
         String[] split = StringUtils.split(line);
         assertNotNull(split);
-        assertTrue(split.length == 4);
+        assertEquals(4, split.length);
         assertEquals("shall", split[0]);
         assertEquals("we, play", split[1]);
         assertEquals("a", split[2]);
@@ -75,11 +76,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void splitWithQuotedCommasAndSpacesAndDifferentQuoteChars() {
+    void splitWithQuotedCommasAndSpacesAndDifferentQuoteChars() {
         String line = "authc, test[blah], test[1,2,3], test[]";
         String[] split = StringUtils.split(line, ',', '[', ']', false, true);
         assertNotNull(split);
-        assertTrue(split.length == 4);
+        assertEquals(4, split.length);
         assertEquals("authc", split[0]);
         assertEquals("testblah", split[1]);
         assertEquals("test1,2,3", split[2]);
@@ -87,11 +88,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void splitWithQuotedCommasAndSpacesAndDifferentQuoteCharsWhileRetainingQuotes() {
+    void splitWithQuotedCommasAndSpacesAndDifferentQuoteCharsWhileRetainingQuotes() {
         String line = "authc, test[blah], test[1,2,3], test[]";
         String[] split = StringUtils.split(line, ',', '[', ']', true, true);
         assertNotNull(split);
-        assertTrue(split.length == 4);
+        assertEquals(4, split.length);
         assertEquals("authc", split[0]);
         assertEquals("test[blah]", split[1]);
         assertEquals("test[1,2,3]", split[2]);
@@ -99,11 +100,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void splitTestWithQuotedCommas() {
+    void splitTestWithQuotedCommas() {
         String line = "authc, test[blah], test[\"1,2,3\"], test[]";
         String[] split = StringUtils.split(line);
         assertNotNull(split);
-        assertTrue(split.length == 4);
+        assertEquals(4, split.length);
         assertEquals("authc", split[0]);
         assertEquals("test[blah]", split[1]);
         assertEquals("test[1,2,3]", split[2]);
@@ -111,11 +112,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void splitWithQuotedCommasAndSpacesAndEscapedQuotes() {
+    void splitWithQuotedCommasAndSpacesAndEscapedQuotes() {
         String line = "shall, \"\"\"we, play\", a, \"\"\"game?";
         String[] split = StringUtils.split(line);
         assertNotNull(split);
-        assertTrue(split.length == 4);
+        assertEquals(4, split.length);
         assertEquals("shall", split[0]);
         assertEquals("\"we, play", split[1]);
         assertEquals("a", split[2]);

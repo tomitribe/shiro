@@ -24,6 +24,7 @@ import org.apache.shiro.util.CollectionUtils;
 import org.apache.shiro.lang.util.Nameable;
 import org.apache.shiro.lang.util.StringUtils;
 import org.apache.shiro.web.config.IniFilterChainResolverFactory;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.filter.AccessControlFilter;
 import org.apache.shiro.web.filter.InvalidRequestFilter;
 import org.apache.shiro.web.filter.authc.AuthenticationFilter;
@@ -35,6 +36,7 @@ import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.AbstractShiroFilter;
+import org.apache.shiro.web.servlet.OncePerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -108,7 +110,7 @@ import java.util.Map;
  * <li>{@link #setSuccessUrl(String)}</li>
  * <li>{@link #setUnauthorizedUrl(String)}</li>
  * </ul>
- *
+ * <p>
  * Then at startup, any values specified via these 3 properties will be applied to all configured
  * Filter instances so you don't have to specify them individually on each filter instance.  To ensure your own custom
  * filters benefit from this convenience, your filter implementation should subclass one of the 3 mentioned
@@ -119,7 +121,7 @@ import java.util.Map;
  */
 public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
 
-    private static transient final Logger log = LoggerFactory.getLogger(ShiroFilterFactoryBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShiroFilterFactoryBean.class);
 
     private SecurityManager securityManager;
 
@@ -127,23 +129,29 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
 
     private List<String> globalFilters;
 
-    private Map<String, String> filterChainDefinitionMap; //urlPathExpression_to_comma-delimited-filter-chain-definition
+    //urlPathExpression_to_comma-delimited-filter-chain-definition
+    private Map<String, String> filterChainDefinitionMap;
 
     private String loginUrl;
     private String successUrl;
     private String unauthorizedUrl;
+    private boolean caseInsensitive;
 
     private AbstractShiroFilter instance;
+
+    private ShiroFilterConfiguration filterConfiguration;
 
     public ShiroFilterFactoryBean() {
         this.filters = new LinkedHashMap<String, Filter>();
         this.globalFilters = new ArrayList<>();
         this.globalFilters.add(DefaultFilter.invalidRequest.name());
-        this.filterChainDefinitionMap = new LinkedHashMap<String, String>(); //order matters!
+        //order matters!
+        this.filterChainDefinitionMap = new LinkedHashMap<String, String>();
+        this.filterConfiguration = new ShiroFilterConfiguration();
     }
 
     /**
-     * Sets the application {@code SecurityManager} instance to be used by the constructed Shiro Filter.  This is a
+     * Gets the application {@code SecurityManager} instance to be used by the constructed Shiro Filter.  This is a
      * required property - failure to set it will throw an initialization exception.
      *
      * @return the application {@code SecurityManager} instance to be used by the constructed Shiro Filter.
@@ -163,12 +171,30 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
     }
 
     /**
+     * Gets the application {@code ShiroFilterConfiguration} instance to be used by the constructed Shiro Filter.
+     *
+     * @return the application {@code ShiroFilterConfiguration} instance to be used by the constructed Shiro Filter.
+     */
+    public ShiroFilterConfiguration getShiroFilterConfiguration() {
+        return filterConfiguration;
+    }
+
+    /**
+     * Sets the application {@code ShiroFilterConfiguration} instance to be used by the constructed Shiro Filter.
+     *
+     * @param filterConfiguration the application {@code SecurityManager} instance to be used by the constructed Shiro Filter.
+     */
+    public void setShiroFilterConfiguration(ShiroFilterConfiguration filterConfiguration) {
+        this.filterConfiguration = filterConfiguration;
+    }
+
+    /**
      * Returns the application's login URL to be assigned to all acquired Filters that subclass
      * {@link AccessControlFilter} or {@code null} if no value should be assigned globally. The default value
      * is {@code null}.
      *
      * @return the application's login URL to be assigned to all acquired Filters that subclass
-     *         {@link AccessControlFilter} or {@code null} if no value should be assigned globally.
+     * {@link AccessControlFilter} or {@code null} if no value should be assigned globally.
      * @see #setLoginUrl
      */
     public String getLoginUrl() {
@@ -200,7 +226,7 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      * is {@code null}.
      *
      * @return the application's after-login success URL to be assigned to all acquired Filters that subclass
-     *         {@link AuthenticationFilter} or {@code null} if no value should be assigned globally.
+     * {@link AuthenticationFilter} or {@code null} if no value should be assigned globally.
      * @see #setSuccessUrl
      */
     public String getSuccessUrl() {
@@ -232,7 +258,7 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      * is {@code null}.
      *
      * @return the application's after-login success URL to be assigned to all acquired Filters that subclass
-     *         {@link AuthenticationFilter} or {@code null} if no value should be assigned globally.
+     * {@link AuthenticationFilter} or {@code null} if no value should be assigned globally.
      * @see #setSuccessUrl
      */
     public String getUnauthorizedUrl() {
@@ -256,6 +282,21 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      */
     public void setUnauthorizedUrl(String unauthorizedUrl) {
         this.unauthorizedUrl = unauthorizedUrl;
+    }
+
+    /**
+     * @return true if filter chain matching should be case insensitive.
+     */
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    /**
+     * Sets whether filter chain matching should be case insensitive.
+     * @param caseInsensitive true if filter chain matching should be case insensitive.
+     */
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        this.caseInsensitive = caseInsensitive;
     }
 
     /**
@@ -297,7 +338,7 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      * path expression) and the map value is the comma-delimited string chain definition.
      *
      * @return he chainName-to-chainDefinition map of chain definitions to use for creating filter chains intercepted
-     *         by the Shiro Filter.
+     * by the Shiro Filter.
      */
     public Map<String, String> getFilterChainDefinitionMap() {
         return filterChainDefinitionMap;
@@ -320,7 +361,7 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      * A convenience method that sets the {@link #setFilterChainDefinitionMap(java.util.Map) filterChainDefinitionMap}
      * property by accepting a {@link java.util.Properties Properties}-compatible string (multi-line key/value pairs).
      * Each key/value pair must conform to the format defined by the
-     * {@link FilterChainManager#createChain(String,String)} JavaDoc - each property key is an ant URL
+     * {@link FilterChainManager#createChain(String, String)} JavaDoc - each property key is an ant URL
      * path expression and the value is the comma-delimited chain definition.
      *
      * @param definitions a {@link java.util.Properties Properties}-compatible string (multi-line key/value pairs)
@@ -340,7 +381,9 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
     }
 
     /**
-     * Sets the list of filters that will be executed against every request.  Defaults to the {@link InvalidRequestFilter} which will block known invalid request attacks.
+     * Sets the list of filters that will be executed against every request.
+     * Defaults to the {@link InvalidRequestFilter} which will block known invalid request attacks.
+     *
      * @param globalFilters the list of filters to execute before specific path filters.
      */
     public void setGlobalFilters(List<String> globalFilters) {
@@ -382,6 +425,7 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
     protected FilterChainManager createFilterChainManager() {
 
         DefaultFilterChainManager manager = new DefaultFilterChainManager();
+        manager.setCaseInsensitive(caseInsensitive);
         Map<String, Filter> defaultFilters = manager.getFilters();
         //apply global settings if necessary:
         for (Filter filter : defaultFilters.values()) {
@@ -418,7 +462,8 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
         }
 
         // create the default chain, to match anything the path matching would have missed
-        manager.createDefaultChain("/**"); // TODO this assumes ANT path matching, which might be OK here
+        // TODO this assumes ANT path matching, which might be OK here
+        manager.createDefaultChain("/**");
 
         return manager;
     }
@@ -443,7 +488,7 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      */
     protected AbstractShiroFilter createInstance() throws Exception {
 
-        log.debug("Creating Shiro Filter instance.");
+        LOGGER.debug("Creating Shiro Filter instance.");
 
         SecurityManager securityManager = getSecurityManager();
         if (securityManager == null) {
@@ -461,14 +506,14 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
         //Expose the constructed FilterChainManager by first wrapping it in a
         // FilterChainResolver implementation. The AbstractShiroFilter implementations
         // do not know about FilterChainManagers - only resolvers:
-        PathMatchingFilterChainResolver chainResolver = new PathMatchingFilterChainResolver();
+        PathMatchingFilterChainResolver chainResolver = new PathMatchingFilterChainResolver().caseInsensitive(caseInsensitive);
         chainResolver.setFilterChainManager(manager);
 
         //Now create a concrete ShiroFilter instance and apply the acquired SecurityManager and built
         //FilterChainResolver.  It doesn't matter that the instance is an anonymous inner class
         //here - we're just using it because it is a concrete AbstractShiroFilter instance that accepts
         //injection of the SecurityManager and FilterChainResolver:
-        return new SpringShiroFilter((WebSecurityManager) securityManager, chainResolver);
+        return new SpringShiroFilter((WebSecurityManager) securityManager, chainResolver, getShiroFilterConfiguration());
     }
 
     private void applyLoginUrlIfNecessary(Filter filter) {
@@ -511,6 +556,10 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
         applyLoginUrlIfNecessary(filter);
         applySuccessUrlIfNecessary(filter);
         applyUnauthorizedUrlIfNecessary(filter);
+
+        if (filter instanceof OncePerRequestFilter) {
+            ((OncePerRequestFilter) filter).setFilterOncePerRequest(filterConfiguration.isFilterOncePerRequest());
+        }
     }
 
     /**
@@ -520,12 +569,12 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      */
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof Filter) {
-            log.debug("Found filter chain candidate filter '{}'", beanName);
+            LOGGER.debug("Found filter chain candidate filter '{}'", beanName);
             Filter filter = (Filter) bean;
             applyGlobalPropertiesIfNecessary(filter);
             getFilters().put(beanName, filter);
         } else {
-            log.trace("Ignoring non-Filter bean '{}'", beanName);
+            LOGGER.trace("Ignoring non-Filter bean '{}'", beanName);
         }
         return bean;
     }
@@ -549,12 +598,15 @@ public class ShiroFilterFactoryBean implements FactoryBean, BeanPostProcessor {
      */
     private static final class SpringShiroFilter extends AbstractShiroFilter {
 
-        protected SpringShiroFilter(WebSecurityManager webSecurityManager, FilterChainResolver resolver) {
+        protected SpringShiroFilter(WebSecurityManager webSecurityManager,
+                                    FilterChainResolver resolver,
+                                    ShiroFilterConfiguration filterConfiguration) {
             super();
             if (webSecurityManager == null) {
                 throw new IllegalArgumentException("WebSecurityManager property cannot be null.");
             }
             setSecurityManager(webSecurityManager);
+            setShiroFilterConfiguration(filterConfiguration);
 
             if (resolver != null) {
                 setFilterChainResolver(resolver);

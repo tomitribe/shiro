@@ -30,6 +30,7 @@ import org.apache.shiro.env.Environment;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.SessionManager;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.env.EnvironmentLoader;
 import org.apache.shiro.web.env.WebEnvironment;
 import org.apache.shiro.web.filter.InvalidRequestFilter;
@@ -43,8 +44,10 @@ import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.apache.shiro.web.session.mgt.ServletContainerSessionManager;
 import org.easymock.EasyMock;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import javax.inject.Named;
 import javax.servlet.Filter;
@@ -61,16 +64,25 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@Isolated("System property usage")
 public class ShiroWebModuleTest {
 
 
     @Test
-    public void basicInstantiation() {
+    void basicInstantiation() {
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
 
@@ -88,23 +100,23 @@ public class ShiroWebModuleTest {
 
         });
         // we're not getting a WebSecurityManager here b/c it's not exposed.  There didn't seem to be a good reason to
-        // expose it outside of the Shiro module.
+        // expose it outside the Shiro module.
         SecurityManager securityManager = injector.getInstance(SecurityManager.class);
         assertNotNull(securityManager);
         assertTrue(securityManager instanceof WebSecurityManager);
         SessionManager sessionManager = injector.getInstance(SessionManager.class);
         assertNotNull(sessionManager);
         assertTrue(sessionManager instanceof ServletContainerSessionManager);
-        assertTrue(((DefaultWebSecurityManager)securityManager).getSessionManager() instanceof ServletContainerSessionManager);
+        assertTrue(((DefaultWebSecurityManager) securityManager).getSessionManager() instanceof ServletContainerSessionManager);
     }
 
     @Test
-    public void testBindGuiceFilter() throws Exception {
+    void testBindGuiceFilter() throws Exception {
 
     }
 
     @Test
-    public void testBindWebSecurityManager() throws Exception {
+    void testBindWebSecurityManager() throws Exception {
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
 
@@ -132,11 +144,11 @@ public class ShiroWebModuleTest {
         assertNotNull(webSecurityManager);
         assertTrue(webSecurityManager instanceof MyDefaultWebSecurityManager);
         // SHIRO-435: Check both keys SecurityManager and WebSecurityManager are bound to the same instance
-        assertTrue( securityManager == webSecurityManager );
+        assertTrue(securityManager == webSecurityManager);
     }
 
     @Test
-    public void testBindWebEnvironment() throws Exception {
+    void testBindWebEnvironment() throws Exception {
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
 
@@ -165,14 +177,15 @@ public class ShiroWebModuleTest {
         assertNotNull(webEnvironment);
         assertTrue(webEnvironment instanceof MyWebEnvironment);
         // SHIRO-435: Check both keys Environment and WebEnvironment are bound to the same instance
-        assertTrue( environment == webEnvironment );
+        assertTrue(environment == webEnvironment);
     }
 
     /**
      * @since 1.4
      */
+    @SuppressWarnings("checkstyle:MethodLength")
     @Test
-    public void testAddFilterChainGuice3and4() {
+    void testAddFilterChainGuice3and4() {
 
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
@@ -199,7 +212,8 @@ public class ShiroWebModuleTest {
                 this.addFilterChain("/test_custom_filter/**", Key.get(CustomFilter.class));
                 this.addFilterChain("/test_authc_basic/**", AUTHC_BASIC);
                 this.addFilterChain("/test_perms/**", filterConfig(PERMS, "remote:invoke:lan,wan"));
-                this.addFilterChain("/multiple_configs/**", filterConfig(AUTHC), filterConfig(ROLES, "b2bClient"), filterConfig(PERMS, "remote:invoke:lan,wan"));
+                this.addFilterChain("/multiple_configs/**", filterConfig(AUTHC), filterConfig(ROLES, "b2bClient"),
+                        filterConfig(PERMS, "remote:invoke:lan,wan"));
             }
 
             @Provides
@@ -259,9 +273,10 @@ public class ShiroWebModuleTest {
      * @since 1.4
      */
     @Test
-    public void testAddFilterChainGuice3Only() {
+    @Tag("Guice3")
+    void testAddFilterChainGuice3Only() {
 
-        Assume.assumeTrue("This test only runs against Guice 3.x", ShiroWebModule.isGuiceVersion3());
+        Assumptions.assumeTrue(ShiroWebModule.isGuiceVersion3(), "This test only runs against Guice 3.x");
 
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
@@ -277,14 +292,20 @@ public class ShiroWebModuleTest {
         replay(servletContext, request);
 
         Injector injector = Guice.createInjector(new ShiroWebModule(servletContext) {
+
             @Override
+            @SuppressWarnings("unchecked")
+            @Deprecated
             protected void configureShiroWeb() {
                 bindRealm().to(ShiroModuleTest.MockRealm.class);
                 expose(FilterChainResolver.class);
                 this.addFilterChain("/test_authc/**", AUTHC);
                 this.addFilterChain("/test_custom_filter/**", Key.get(CustomFilter.class));
                 this.addFilterChain("/test_perms/**", config(PERMS, "remote:invoke:lan,wan"));
-                this.addFilterChain("/multiple_configs/**", AUTHC, config(ROLES, "b2bClient"), config(PERMS, "remote:invoke:lan,wan"));
+                this.addFilterChain("/multiple_configs/**",
+                                            AUTHC,
+                                            config(ROLES, "b2bClient"),
+                                            config(PERMS, "remote:invoke:lan,wan"));
             }
 
             @Provides
@@ -326,7 +347,7 @@ public class ShiroWebModuleTest {
     }
 
     @Test
-    public void testDefaultPath() {
+    void testDefaultPath() {
 
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
@@ -369,7 +390,7 @@ public class ShiroWebModuleTest {
     }
 
     @Test
-    public void testDisableGlobalFilters() {
+    void testDisableGlobalFilters() {
 
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
@@ -417,7 +438,7 @@ public class ShiroWebModuleTest {
     }
 
     @Test
-    public void testChangeInvalidFilterConfig() {
+    void testChangeInvalidFilterConfig() {
 
         final ShiroModuleTest.MockRealm mockRealm = createMock(ShiroModuleTest.MockRealm.class);
         ServletContext servletContext = createMock(ServletContext.class);
@@ -458,7 +479,7 @@ public class ShiroWebModuleTest {
 
         Filter invalidRequestFilter = getNextFilter((SimpleFilterChain) filterChain);
         assertThat(invalidRequestFilter, instanceOf(InvalidRequestFilter.class));
-        assertFalse("Expected 'blockBackslash' to be false", ((InvalidRequestFilter) invalidRequestFilter).isBlockBackslash());
+        assertFalse(((InvalidRequestFilter) invalidRequestFilter).isBlockBackslash(), "Expected 'blockBackslash' to be false");
         assertThat(getNextFilter((SimpleFilterChain) filterChain), instanceOf(FormAuthenticationFilter.class));
         assertThat(getNextFilter((SimpleFilterChain) filterChain), nullValue());
 
@@ -487,20 +508,25 @@ public class ShiroWebModuleTest {
 
     public static class MyWebEnvironment extends WebGuiceEnvironment {
         @Inject
-        MyWebEnvironment(FilterChainResolver filterChainResolver, @Named(ShiroWebModule.NAME) ServletContext servletContext, WebSecurityManager securityManager) {
-            super(filterChainResolver, servletContext, securityManager);
+        MyWebEnvironment(FilterChainResolver filterChainResolver, @Named(ShiroWebModule.NAME) ServletContext servletContext,
+                         WebSecurityManager securityManager, ShiroFilterConfiguration filterConfiguration) {
+            super(filterChainResolver, servletContext, securityManager, filterConfiguration);
         }
     }
 
     public static class CustomFilter implements Filter {
 
         @Override
-        public void init(FilterConfig filterConfig) throws ServletException {}
+        public void init(FilterConfig filterConfig) throws ServletException {
+        }
 
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {}
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+        }
 
         @Override
-        public void destroy() {}
+        public void destroy() {
+        }
     }
 }

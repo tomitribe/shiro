@@ -18,7 +18,7 @@
  */
 package org.apache.shiro.spring.boot.autoconfigure
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.matchesPattern
@@ -34,9 +34,9 @@ class SpringFactoriesTest {
     }
 
     static private assertNoWhitespaceInEntries(Properties props) {
-        props.each{ key, val ->
+        props.each { key, val ->
             assertThat "Property [${key}] contains whitespace",
-            props.get("org.springframework.boot.autoconfigure.EnableAutoConfiguration"), not(matchesPattern(".*\\s.*"))
+                    props.get("org.springframework.boot.autoconfigure.EnableAutoConfiguration"), not(matchesPattern(".*\\s.*"))
         }
     }
 }

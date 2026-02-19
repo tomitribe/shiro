@@ -73,7 +73,7 @@ public abstract class SessionsSecurityManager extends AuthorizingSecurityManager
      * <tt>SessionManager</tt> instance.
      * <p/>
      * If a <tt>SessionManager</tt> instance is not set, a default one will be automatically created and
-     * initialized appropriately for the the existing runtime environment.
+     * initialized appropriately for the existing runtime environment.
      *
      * @param sessionManager delegate instance to use to support this manager's <tt>SessionManager</tt> method calls.
      */
@@ -98,9 +98,9 @@ public abstract class SessionsSecurityManager extends AuthorizingSecurityManager
     }
 
     /**
-     * Calls {@link org.apache.shiro.mgt.AuthorizingSecurityManager#afterCacheManagerSet() super.afterCacheManagerSet()} and then immediately calls
-     * {@link #applyCacheManagerToSessionManager() applyCacheManagerToSessionManager()} to ensure the
-     * <code>CacheManager</code> is applied to the SessionManager as necessary.
+     * Calls {@link org.apache.shiro.mgt.AuthorizingSecurityManager#afterCacheManagerSet() super.afterCacheManagerSet()}
+     * and then immediately calls {@link #applyCacheManagerToSessionManager() applyCacheManagerToSessionManager()}
+     * to ensure the <code>CacheManager</code> is applied to the SessionManager as necessary.
      */
     @Override
     protected void afterCacheManagerSet() {
@@ -144,7 +144,7 @@ public abstract class SessionsSecurityManager extends AuthorizingSecurityManager
     protected void applyEventBusToSessionManager() {
         EventBus eventBus = getEventBus();
         if (eventBus != null && this.sessionManager instanceof EventBusAware) {
-            ((EventBusAware)this.sessionManager).setEventBus(eventBus);
+            ((EventBusAware) this.sessionManager).setEventBus(eventBus);
         }
     }
 

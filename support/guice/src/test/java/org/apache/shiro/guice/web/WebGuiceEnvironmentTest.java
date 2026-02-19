@@ -19,22 +19,29 @@
 package org.apache.shiro.guice.web;
 
 import com.google.inject.spi.InjectionPoint;
+import org.apache.shiro.web.config.ShiroFilterConfiguration;
 import org.apache.shiro.web.env.EnvironmentLoaderListener;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.easymock.Capture;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.ServletContext;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.easymock.EasyMock.and;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class WebGuiceEnvironmentTest {
 
     @Test
-    public void ensureInjectable() {
+    void ensureInjectable() {
         try {
             InjectionPoint ip = InjectionPoint.forConstructorOf(WebGuiceEnvironment.class);
         } catch (Exception e) {
@@ -43,17 +50,20 @@ public class WebGuiceEnvironmentTest {
     }
 
     @Test
-    public void testConstructor() {
+    void testConstructor() {
         WebSecurityManager securityManager = createMock(WebSecurityManager.class);
         FilterChainResolver filterChainResolver = createMock(FilterChainResolver.class);
         ServletContext servletContext = createMock(ServletContext.class);
+        ShiroFilterConfiguration filterConfiguration = createMock(ShiroFilterConfiguration.class);
 
         Capture<WebGuiceEnvironment> capture = Capture.newInstance();
-        servletContext.setAttribute(eq(EnvironmentLoaderListener.ENVIRONMENT_ATTRIBUTE_KEY), and(anyObject(WebGuiceEnvironment.class), capture(capture)));
+        servletContext.setAttribute(eq(EnvironmentLoaderListener.ENVIRONMENT_ATTRIBUTE_KEY),
+                and(anyObject(WebGuiceEnvironment.class), capture(capture)));
 
         replay(servletContext, securityManager, filterChainResolver);
 
-        WebGuiceEnvironment underTest = new WebGuiceEnvironment(filterChainResolver, servletContext, securityManager);
+        WebGuiceEnvironment underTest =
+                new WebGuiceEnvironment(filterChainResolver, servletContext, securityManager, filterConfiguration);
 
         assertSame(securityManager, underTest.getSecurityManager());
         assertSame(filterChainResolver, underTest.getFilterChainResolver());

@@ -25,7 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Requires the currently executing {@link org.apache.shiro.subject.Subject Subject} to have all of the 
+ * Requires the currently executing {@link org.apache.shiro.subject.Subject Subject} to have all of the
  * specified roles. If they do not have the role(s), the method will not be executed and
  * an {@link org.apache.shiro.authz.AuthorizationException AuthorizationException} is thrown.
  * <p/>
@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * {@link RequiresPermissions RequiresPermissions} annotation makes sense - Permission
  * types will not change during runtime for an application since permissions directly correspond to how
  * the application's functionality is programmed (that is, they reflect the application's functionality only, not
- * <em>who</em> is executing the the functionality).
+ * <em>who</em> is executing the functionality).
  *
  * @see org.apache.shiro.subject.Subject#hasRole(String)
  * @since 0.1
@@ -61,10 +61,11 @@ public @interface RequiresRoles {
      * invocation to be allowed.
      */
     String[] value();
-    
+
     /**
      * The logical operation for the permission check in case multiple roles are specified. AND is the default
+     *
      * @since 1.1.0
      */
-    Logical logical() default Logical.AND; 
+    Logical logical() default Logical.AND;
 }

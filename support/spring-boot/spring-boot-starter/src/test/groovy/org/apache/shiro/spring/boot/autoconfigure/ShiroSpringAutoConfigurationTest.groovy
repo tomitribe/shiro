@@ -27,19 +27,19 @@ import org.apache.shiro.event.EventBus
 import org.apache.shiro.mgt.DefaultSecurityManager
 import org.apache.shiro.mgt.SecurityManager
 import org.apache.shiro.subject.Subject
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @since 1.4.0
  */
 @SpringBootTest(classes = [ShiroAutoConfigurationTestApplication])
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class ShiroSpringAutoConfigurationTest {
 
     @Autowired
@@ -64,7 +64,7 @@ public class ShiroSpringAutoConfigurationTest {
         assertNotNull eventBus
         assertTrue(eventBus.registry.containsKey(subscribedListener))
         assertSame(eventBusAwareObject.getEventBus(), eventBus)
-        assertSame(((DefaultSecurityManager)securityManager).getEventBus(), eventBus)
+        assertSame(((DefaultSecurityManager) securityManager).getEventBus(), eventBus)
 
         // now lets do a couple quick permission tests to make sure everything has been initialized correctly.
         Subject joeCoder = new Subject.Builder(securityManager).buildSubject()

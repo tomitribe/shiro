@@ -51,7 +51,8 @@ import org.apache.shiro.authc.AuthenticationToken;
  * practically any application environment.
  *
  * <p>Most users will not implement the <tt>Realm</tt> interface directly, but will extend one of the subclasses,
- * {@link org.apache.shiro.realm.AuthenticatingRealm AuthenticatingRealm} or {@link org.apache.shiro.realm.AuthorizingRealm}, greatly reducing the effort required
+ * {@link org.apache.shiro.realm.AuthenticatingRealm AuthenticatingRealm} or
+ * {@link org.apache.shiro.realm.AuthorizingRealm}, greatly reducing the effort required
  * to implement a <tt>Realm</tt> from scratch.</p>
  *
  * @see org.apache.shiro.realm.CachingRealm CachingRealm
@@ -80,7 +81,7 @@ public interface Realm {
      *
      * @param token the AuthenticationToken submitted for the authentication attempt
      * @return <tt>true</tt> if this realm can/will authenticate Subjects represented by specified token,
-     *         <tt>false</tt> otherwise.
+     * <tt>false</tt> otherwise.
      */
     boolean supports(AuthenticationToken token);
 
@@ -90,15 +91,15 @@ public interface Realm {
      *
      * <p>This method effectively represents a login attempt for the corresponding user with the underlying EIS datasource.
      * Most implementations merely just need to lookup and return the account data only (as the method name implies)
-     * and let Shiro do the rest, but implementations may of course perform eis specific login operations if so
+     * and let Shiro do the rest, but implementations may of course perform EIS specific login operations if so
      * desired.
      *
      * @param token the application-specific representation of an account principal and credentials.
      * @return the authentication information for the account associated with the specified <tt>token</tt>,
-     *         or <tt>null</tt> if no account could be found.
-     * @throws org.apache.shiro.authc.AuthenticationException
-     *          if there is an error obtaining or constructing an AuthenticationInfo object based on the
-     *          specified <tt>token</tt> or implementation-specific login behavior fails.
+     * or <tt>null</tt> if no account could be found.
+     * @throws org.apache.shiro.authc.AuthenticationException if there is an error obtaining or constructing
+     *                                                        an AuthenticationInfo object based on the specified <tt>token</tt>
+     *                                                        or implementation-specific login behavior fails.
      */
     AuthenticationInfo getAuthenticationInfo(AuthenticationToken token) throws AuthenticationException;
 

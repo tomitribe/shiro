@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("checkstyle:MagicNumber")
 @Dependent
 @Default
 public class InMemoryStormtrooperDao implements StormtrooperDao {
@@ -45,7 +46,7 @@ public class InMemoryStormtrooperDao implements StormtrooperDao {
     static {
         Faker faker = new Faker();
         final FakeValuesService fakeValuesService = new FakeValuesService(Locale.ENGLISH, new RandomService());
-        for (int ii = 0; ii < 50; ii++) {
+        while (TROOPERS.size() < 50) {
             final StormtrooperId stormtrooperId = new StormtrooperId(fakeValuesService.numerify("u######"));
             final Name name = faker.name();
             final Instant registeredAt = faker.date().birthday(16, 67).toInstant();
@@ -61,7 +62,7 @@ public class InMemoryStormtrooperDao implements StormtrooperDao {
 
     @Override
     public Optional<Stormtrooper> getStormtrooper(StormtrooperId id) {
-            return Optional.ofNullable(TROOPERS.get(id));
+        return Optional.ofNullable(TROOPERS.get(id));
     }
 
     @Override
@@ -87,6 +88,7 @@ public class InMemoryStormtrooperDao implements StormtrooperDao {
     @Override
     public boolean deleteStormtrooper(StormtrooperId id) {
         // TODO: implement
-        throw new UnsupportedOperationException("not yet implemented: [org.apache.shiro.testing.meecrowave.jaxrs.dao.InMemoryStormtrooperDao::deleteStormtrooper].");
+        throw new UnsupportedOperationException("not yet implemented: "
+                + "[org.apache.shiro.testing.meecrowave.jaxrs.dao.InMemoryStormtrooperDao::deleteStormtrooper].");
     }
 }

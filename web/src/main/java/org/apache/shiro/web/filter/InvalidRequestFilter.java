@@ -25,6 +25,7 @@ import org.apache.shiro.web.util.WebUtils;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,43 +37,62 @@ import java.util.List;
  * <ul>
  *     <li>Semicolon - can be disabled by setting {@code blockSemicolon = false}</li>
  *     <li>Backslash - can be disabled by setting {@code blockBackslash = false}</li>
- *     <li>Non-ASCII characters - can be disabled by setting {@code blockNonAscii = false}, the ability to disable this check will be removed in future version.</li>
+ *     <li>Non-ASCII characters - can be disabled by setting {@code blockNonAscii = false},
+ *     the ability to disable this check will be removed in future version.</li>
+ *     <li>Path traversals - can be disabled by setting {@code blockTraversal = false}</li>
  * </ul>
  *
- * @see <a href="https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/web/firewall/StrictHttpFirewall.html">This class was inspired by Spring Security StrictHttpFirewall</a>
+ * @see <a href="https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/web/firewall/StrictHttpFirewall.html">
+ * This class was inspired by Spring Security StrictHttpFirewall</a>
  * @since 1.6
  */
 public class InvalidRequestFilter extends AccessControlFilter {
+    public enum PathTraversalBlockMode {
+        STRICT,
+        NORMAL,
+        NO_BLOCK;
+    }
 
     private static final List<String> SEMICOLON = Collections.unmodifiableList(Arrays.asList(";", "%3b", "%3B"));
 
     private static final List<String> BACKSLASH = Collections.unmodifiableList(Arrays.asList("\\", "%5c", "%5C"));
 
+    private static final List<String> FORWARDSLASH = Collections.unmodifiableList(Arrays.asList("%2f", "%2F"));
+
+    private static final List<String> PERIOD = Collections.unmodifiableList(Arrays.asList("%2e", "%2E"));
+
     private boolean blockSemicolon = true;
 
-    private boolean blockBackslash = !Boolean.getBoolean(WebUtils.ALLOW_BACKSLASH);
+    private boolean blockBackslash = !WebUtils.isAllowBackslash();
 
     private boolean blockNonAscii = true;
+
+    private PathTraversalBlockMode pathTraversalBlockMode = PathTraversalBlockMode.NORMAL;
 
     @Override
     protected boolean isAccessAllowed(ServletRequest req, ServletResponse response, Object mappedValue) throws Exception {
         HttpServletRequest request = WebUtils.toHttp(req);
         // check the original and decoded values
-        return isValid(request.getRequestURI())      // user request string (not decoded)
-                && isValid(request.getServletPath()) // decoded servlet part
-                && isValid(request.getPathInfo());   // decoded path info (may be null)
+
+        // user request string (not decoded)
+        return isValid(request.getRequestURI())
+                // decoded servlet part
+                && isValid(request.getServletPath())
+                // decoded path info (maybe null)
+                && isValid(request.getPathInfo());
     }
 
     private boolean isValid(String uri) {
         return !StringUtils.hasText(uri)
-               || ( !containsSemicolon(uri)
-                 && !containsBackslash(uri)
-                 && !containsNonAsciiCharacters(uri));
+                || (!containsSemicolon(uri)
+                && !containsBackslash(uri)
+                && !containsNonAsciiCharacters(uri))
+                && !containsTraversal(uri);
     }
 
     @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
-        WebUtils.toHttp(response).sendError(400, "Invalid request");
+        WebUtils.toHttp(response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request");
         return false;
     }
 
@@ -108,6 +128,44 @@ public class InvalidRequestFilter extends AccessControlFilter {
         return true;
     }
 
+    private boolean containsTraversal(String uri) {
+        if (pathTraversalBlockMode == PathTraversalBlockMode.NORMAL) {
+            return !(isNormalized(uri));
+        }
+        if (pathTraversalBlockMode == PathTraversalBlockMode.STRICT) {
+            return !(isNormalized(uri)
+                    && PERIOD.stream().noneMatch(uri::contains)
+                    && FORWARDSLASH.stream().noneMatch(uri::contains));
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether a path is normalized (doesn't contain path traversal sequences like
+     * "./", "/../" or "/.")
+     *
+     * @param path the path to test
+     * @return true if the path doesn't contain any path-traversal character sequences.
+     */
+    private boolean isNormalized(String path) {
+        if (path == null) {
+            return true;
+        }
+        for (int i = path.length(); i > 0; ) {
+            int slashIndex = path.lastIndexOf('/', i - 1);
+            int gap = i - slashIndex;
+            if (gap == 2 && path.charAt(slashIndex + 1) == '.') {
+                // ".", "/./" or "/."
+                return false;
+            }
+            if (gap == 3 && path.charAt(slashIndex + 1) == '.' && path.charAt(slashIndex + 2) == '.') {
+                return false;
+            }
+            i = slashIndex;
+        }
+        return true;
+    }
+
     public boolean isBlockSemicolon() {
         return blockSemicolon;
     }
@@ -130,5 +188,53 @@ public class InvalidRequestFilter extends AccessControlFilter {
 
     public void setBlockNonAscii(boolean blockNonAscii) {
         this.blockNonAscii = blockNonAscii;
+    }
+
+    public PathTraversalBlockMode getPathTraversalBlockMode() {
+        return pathTraversalBlockMode;
+    }
+
+    public void setBlockPathTraversal(PathTraversalBlockMode mode) {
+        this.pathTraversalBlockMode = mode;
+    }
+
+    public boolean isBlockEncodedPeriod() {
+        return pathTraversalBlockMode == PathTraversalBlockMode.STRICT;
+    }
+
+    public void setBlockEncodedPeriod(boolean blockEncodedPeriod) {
+        setBlockPathTraversal(blockEncodedPeriod ? PathTraversalBlockMode.STRICT : PathTraversalBlockMode.NORMAL);
+    }
+
+    public boolean isBlockEncodedForwardSlash() {
+        return pathTraversalBlockMode == PathTraversalBlockMode.STRICT;
+    }
+
+    public void setBlockEncodedForwardSlash(boolean blockEncodedForwardSlash) {
+        setBlockPathTraversal(blockEncodedForwardSlash ? PathTraversalBlockMode.STRICT : PathTraversalBlockMode.NORMAL);
+    }
+
+    public boolean isBlockRewriteTraversal() {
+        return pathTraversalBlockMode == PathTraversalBlockMode.NORMAL;
+    }
+
+    public void setBlockRewriteTraversal(boolean blockRewriteTraversal) {
+        setBlockPathTraversal(blockRewriteTraversal ? PathTraversalBlockMode.NORMAL : PathTraversalBlockMode.NO_BLOCK);
+    }
+
+    /**
+     * @deprecated use {@link #getPathTraversalBlockMode()} instead
+     */
+    @Deprecated
+    public boolean isBlockTraversal() {
+        return pathTraversalBlockMode != PathTraversalBlockMode.NO_BLOCK;
+    }
+
+    /**
+     * @deprecated Use {@link #setBlockPathTraversal(PathTraversalBlockMode)}
+     */
+    @Deprecated
+    public void setBlockTraversal(boolean blockTraversal) {
+        this.pathTraversalBlockMode = blockTraversal ? PathTraversalBlockMode.NORMAL : PathTraversalBlockMode.NO_BLOCK;
     }
 }

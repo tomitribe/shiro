@@ -17,19 +17,22 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.apache.shiro</groupId>
         <artifactId>shiro-support</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>999-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shiro-jaxrs</artifactId>
     <name>Apache Shiro :: Support :: JAX-RS</name>
     <packaging>bundle</packaging>
-
+    <properties>
+        <module.name>jaxrs</module.name>
+    </properties>
 
     <dependencies>
 
@@ -48,6 +51,7 @@
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>${jaxrs.api.version}</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- Test Deps -->
@@ -63,9 +67,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>${jakarta.annotations.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <version>3.4.3</version>
+            <version>3.6.10</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -118,6 +127,10 @@
                         <_reproducible>true</_reproducible>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

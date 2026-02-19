@@ -17,7 +17,10 @@
  * under the License.
  */
 
-def deployableBranch = env.BRANCH_NAME ==~ /(1.7.x|1.8.x|1.9.x|main)/
+def deployableBranch = env.BRANCH_NAME ==~ /(1.12.x|1.11.x|1.10.x|main|3.x)/
+def latestSupportedJDK = 'jdk_25_latest'
+def builtinVersion = '999-SNAPSHOT'
+def nextVersion
 
 pipeline {
 
@@ -36,9 +39,7 @@ pipeline {
                     axis {
                         // https://cwiki.apache.org/confluence/display/INFRA/JDK+Installation+Matrix
                         name 'MATRIX_JDK'
-                        values 'jdk_1.8_latest', 'adopt_hs_8_latest', 'adopt_j9_8_latest',
-                                'jdk_11_latest', 'adopt_hs_11_latest', 'adopt_j9_11_latest',
-                                'jdk_17_latest', 'adopt_hs_16_latest', 'adopt_j9_16_latest'
+                        values 'jdk_25_latest', 'jdk_11_latest', 'jdk_17_latest', 'jdk_21_latest'
                     }
                     // Additional axes, like OS and maven version can be configured here.
                 }
@@ -47,6 +48,7 @@ pipeline {
                     node {
                         // https://cwiki.apache.org/confluence/display/INFRA/ci-builds.apache.org
                         label 'ubuntu'
+                        customWorkspace "workspace/${JOB_NAME}/MatrixCheckout/${MATRIX_JDK}/"
                     }
                 }
 
@@ -66,13 +68,14 @@ pipeline {
                         steps {
                             echo 'Building Branch: ' + env.BRANCH_NAME
                             echo 'Using PATH = ' + env.PATH
+                            echo 'Slave Node = ' + env.NODE_NAME
                         }
                     }
 
                     stage('Cleanup') {
                         steps {
                             echo 'Cleaning up the workspace'
-                            cleanWs()
+                            cleanBeforeCheckout()
                         }
                     }
 
@@ -83,22 +86,55 @@ pipeline {
                         }
                     }
 
+                    stage('Use next -SNAPSHOT version') {
+                        when {
+                            expression { deployableBranch }
+                            expression { MATRIX_JDK == latestSupportedJDK }
+                            // is not a PR (GitHub) / MergeRequest (GitLab) / Change (Gerrit)?
+                            not { changeRequest() }
+                        }
+                        steps {
+                            echo 'Setting next -SNAPSHOT version'
+                            script {
+                                def latestRelease = sh(script: """
+                                    curl -sf https://repo.maven.apache.org/maven2/org/apache/shiro/shiro-root/maven-metadata.xml \
+                                    | xmllint --xpath '//metadata/versioning/latest/text()' - 2>/dev/null || echo '$builtinVersion'
+                                    """, returnStdout: true
+                                ).trim()
+
+                                def parts = latestRelease.tokenize('.')
+                                def nextPatch = parts[2].toInteger() + 1
+                                nextVersion = "${parts[0]}.${parts[1]}.${nextPatch}-SNAPSHOT"
+                                if (env.BRANCH_NAME == '3.x') {
+                                    nextVersion = '3.0.0-SNAPSHOT'
+                                }
+
+                                echo "Latest release: ${latestRelease}, next SNAPSHOT: ${nextVersion}"
+                            }
+
+                            sh "./mvnw -B versions:set -DprocessAllModules=true -DgenerateBackupPoms=false \
+                                -DoldVersion=${builtinVersion} -DnewVersion=${nextVersion}"
+                        }
+                    }
+
                     stage('License check') {
                         steps {
                             echo 'License check'
-                            sh 'mvn --batch-mode -Drat.consoleOutput=true apache-rat:check'
+                            sh './mvnw --batch-mode -Drat.consoleOutput=true apache-rat:check'
                         }
                     }
 
                     stage('Build') {
                         steps {
                             echo 'Building'
-                            sh 'mvn clean verify --show-version --errors --batch-mode --no-transfer-progress -Pdocs -Dmaven.test.failure.ignore=true'
+                            sh './mvnw verify --show-version --errors --batch-mode --no-transfer-progress \
+                            -Dmaven.test.failure.ignore=true -Pskip_jakarta_ee_tests'
                         }
                         post {
                             always {
                                 junit(testResults: '**/surefire-reports/*.xml', allowEmptyResults: true)
                                 junit(testResults: '**/failsafe-reports/*.xml', allowEmptyResults: true)
+                                archiveArtifacts artifacts: '**/logs/server.log*', allowEmptyArchive: true
                             }
                         }
                     }
@@ -107,14 +143,14 @@ pipeline {
                         when {
                             allOf {
                                 expression { deployableBranch }
-                                expression { MATRIX_JDK == 'jdk_11_latest' }
+                                expression { MATRIX_JDK == latestSupportedJDK }
                                 // is not a PR (GitHub) / MergeRequest (GitLab) / Change (Gerrit)?
                                 not { changeRequest() }
                             }
                         }
                         steps {
                             echo 'Deploying'
-                            sh 'mvn --batch-mode clean deploy -Pdocs -DskipTests'
+                            sh './mvnw --batch-mode deploy -Pdocs -DskipTests -DskipITs'
                         }
                     }
 
@@ -160,7 +196,7 @@ Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BRANC
                     success {
                         // Cleanup the build directory if the build was successful
                         // (in this case we probably don't have to do any post-build analysis)
-                        cleanWs()
+                        cleanBeforeCheckout()
                         script {
                             if (deployableBranch
                                     && (currentBuild.previousBuild != null) && (currentBuild.previousBuild.result != 'SUCCESS')) {

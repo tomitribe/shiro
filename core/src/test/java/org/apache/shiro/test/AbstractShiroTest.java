@@ -25,7 +25,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.SubjectThreadState;
 import org.apache.shiro.lang.util.LifecycleUtils;
 import org.apache.shiro.util.ThreadState;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 
 /**
  * Abstract test case showing how to use Shiro in testing environments.
@@ -33,6 +33,10 @@ import org.junit.AfterClass;
  * @since 1.2
  */
 public abstract class AbstractShiroTest {
+    /**
+     * The resource name of the global SecurityManager instance used in the test environment
+     */
+    public static final String GLOBAL_SECURITY_MANAGER_RESOURCE = "globalSecurityManager";
 
     private static ThreadState subjectThreadState;
 
@@ -80,7 +84,7 @@ public abstract class AbstractShiroTest {
         return SecurityUtils.getSecurityManager();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownShiro() {
         doClearSubject();
         try {

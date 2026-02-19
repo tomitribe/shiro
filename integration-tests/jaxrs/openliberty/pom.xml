@@ -26,13 +26,14 @@
     <parent>
         <groupId>org.apache.shiro.integrationtests.jaxrs</groupId>
         <artifactId>shiro-its-jaxrs</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>999-SNAPSHOT</version>
     </parent>
 
     <artifactId>shiro-its-jaxrs-openliberty</artifactId>
     <name>Apache Shiro :: ITs :: JAX-RS :: OpenLiberty</name>
 
     <properties>
+        <module.name>its.jaxrs.openliberty</module.name>
         <liberty.var.default.http.port>9080</liberty.var.default.http.port>
         <liberty.var.default.https.port>9443</liberty.var.default.https.port>
         <liberty.var.app.filename>shiro-its-jaxrs-app-${project.version}</liberty.var.app.filename>
@@ -59,7 +60,7 @@
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
-                <version>3.3.4</version>
+                <version>3.12.0</version>
                 <configuration>
                     <serverName>shiro-its-jaxrs-openliberty</serverName>
                     <features>
@@ -70,6 +71,7 @@
                         <feature>jsonb-1.0</feature>
                     </features>
                     <deployPackages>dependencies</deployPackages>
+                    <looseApplication>false</looseApplication>
                     <copyDependencies>
                         <dependency>
                             <groupId>org.slf4j</groupId>
@@ -86,7 +88,7 @@
                         </dependency>
                         <dependency>
                             <groupId>org.apache.logging.log4j</groupId>
-                            <artifactId>log4j-slf4j-impl</artifactId>
+                            <artifactId>log4j-slf4j2-impl</artifactId>
                         </dependency>
                         <dependency>
                             <groupId>org.slf4j</groupId>
@@ -136,8 +138,12 @@
                 <jdk>[16,)</jdk>
             </activation>
             <properties>
-                <surefire.argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED</surefire.argLine>
-                <failsafe.argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED</failsafe.argLine>
+                <surefire.argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens
+                    java.base/java.net=ALL-UNNAMED
+                </surefire.argLine>
+                <failsafe.argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens
+                    java.base/java.net=ALL-UNNAMED
+                </failsafe.argLine>
             </properties>
         </profile>
     </profiles>

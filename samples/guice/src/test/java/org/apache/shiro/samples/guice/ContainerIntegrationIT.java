@@ -18,55 +18,53 @@
  */
 package org.apache.shiro.samples.guice;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebAssert;
-import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.apache.shiro.testing.web.AbstractContainerIT;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.htmlunit.ElementNotFoundException;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.WebAssert;
+import org.htmlunit.html.HtmlCheckBoxInput;
+import org.htmlunit.html.HtmlForm;
+import org.htmlunit.html.HtmlPage;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 public class ContainerIntegrationIT extends AbstractContainerIT {
 
-    @Before
+    @BeforeEach
     public void logOut() throws IOException {
         // Make sure we are logged out
         final HtmlPage homePage = webClient.getPage(getBaseUri());
         try {
             homePage.getAnchorByHref("/logout").click();
-        }
-        catch (ElementNotFoundException e) {
+        } catch (ElementNotFoundException e) {
             //Ignore
         }
     }
 
     @Test
-    public void logIn() throws FailingHttpStatusCodeException, MalformedURLException, IOException, InterruptedException {
+    void logIn() throws FailingHttpStatusCodeException, MalformedURLException, IOException, InterruptedException {
 
         HtmlPage page = webClient.getPage(getBaseUri() + "login.jsp");
         HtmlForm form = page.getFormByName("loginform");
-        form.<HtmlInput>getInputByName("username").setValueAttribute("root");
-        form.<HtmlInput>getInputByName("password").setValueAttribute("secret");
-        page = form.<HtmlInput>getInputByName("submit").click();
+        form.getInputByName("username").setValueAttribute("root");
+        form.getInputByName("password").setValueAttribute("secret");
+        page = form.getInputByName("submit").click();
         // This'll throw an exception if not logged in
         page.getAnchorByHref("/logout");
     }
 
     @Test
-    public void logInAndRememberMe() throws Exception {
+    void logInAndRememberMe() throws Exception {
         HtmlPage page = webClient.getPage(getBaseUri() + "login.jsp");
         HtmlForm form = page.getFormByName("loginform");
-        form.<HtmlInput>getInputByName("username").setValueAttribute("root");
-        form.<HtmlInput>getInputByName("password").setValueAttribute("secret");
+        form.getInputByName("username").setValueAttribute("root");
+        form.getInputByName("password").setValueAttribute("secret");
         HtmlCheckBoxInput checkbox = form.getInputByName("rememberMe");
         checkbox.setChecked(true);
-        page = form.<HtmlInput>getInputByName("submit").click();
+        page = form.getInputByName("submit").click();
         jetty.stop();
         jetty.start();
         page = webClient.getPage(getBaseUri());

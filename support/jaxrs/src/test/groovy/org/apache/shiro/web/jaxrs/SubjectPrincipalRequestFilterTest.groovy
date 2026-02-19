@@ -19,13 +19,13 @@
 package org.apache.shiro.web.jaxrs
 
 import org.easymock.Capture
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.SecurityContext
 
 import static org.easymock.EasyMock.*
-import static org.junit.Assert.*
+import static org.junit.jupiter.api.Assertions.*
 
 /**
  * Tests for {@link SubjectPrincipalRequestFilter}.
@@ -40,6 +40,7 @@ class SubjectPrincipalRequestFilterTest {
         def contextCapture = new Capture<ShiroSecurityContext>()
         def requestContext = mock(ContainerRequestContext)
         def originalSecurityContext = mock(SecurityContext)
+        expect(requestContext.getProperty(anyObject())).andReturn null
         expect(requestContext.getSecurityContext()).andReturn(originalSecurityContext)
         expect(requestContext.setSecurityContext(capture(contextCapture)))
         replay requestContext, originalSecurityContext

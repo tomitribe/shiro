@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,29 +59,27 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *     </pre>
  * </li>
  * </ol>
- * After registering the component, when when an event of a respective type is published, the component's
+ * After registering the component, when an event of a respective type is published, the component's
  * {@code Subscribe}-annotated method(s) will be invoked as expected.
- *
+ * <p>
  * This design (and its constituent helper components) was largely influenced by
  * Guava's <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/eventbus/EventBus.html">EventBus</a>
  * concept, although no code was shared/imported (even though Guava is Apache 2.0 licensed and could have
  * been used).
- *
+ * <p>
  * This implementation is thread-safe and may be used concurrently.
  *
  * @since 1.3
  */
 public class DefaultEventBus implements EventBus {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultEventBus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEventBus.class);
 
-    private static final String EVENT_LISTENER_ERROR_MSG = "Event listener processing failed.  Listeners should " +
-            "generally handle exceptions directly and not propagate to the event bus.";
+    private static final String EVENT_LISTENER_ERROR_MSG = "Event listener processing failed.  Listeners should "
+            + "generally handle exceptions directly and not propagate to the event bus.";
 
     //this is stateless, we can retain a static final reference:
     private static final EventListenerComparator EVENT_LISTENER_COMPARATOR = new EventListenerComparator();
-
-    private EventListenerResolver eventListenerResolver;
 
     //We want to preserve registration order to deliver events to objects in the order that they are registered
     //with the event bus.  This has the nice effect that any Shiro system-level components that are registered first
@@ -98,12 +95,14 @@ public class DefaultEventBus implements EventBus {
     //and the lock provides thread-safety in probably a much simpler mechanism than attempting to write a
     //EventBus-specific Comparator.  This technique is also likely to be faster than a ConcurrentSkipListMap, which
     //is about 3-5 times slower than a standard ConcurrentMap.
-    private final Map<Object, Subscription> registry;
+    final Map<Object, Subscription> registry;
     private final Lock registryReadLock;
     private final Lock registryWriteLock;
+    private EventListenerResolver eventListenerResolver;
 
     public DefaultEventBus() {
-        this.registry = new LinkedHashMap<Object, Subscription>(); //not thread safe, so we need locks:
+        //not thread safe, so we need locks:
+        this.registry = new LinkedHashMap<Object, Subscription>();
         ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
         this.registryReadLock = rwl.readLock();
         this.registryWriteLock = rwl.writeLock();
@@ -120,7 +119,7 @@ public class DefaultEventBus implements EventBus {
 
     public void publish(Object event) {
         if (event == null) {
-            log.info("Received null event for publishing.  Ignoring and returning.");
+            LOGGER.info("Received null event for publishing.  Ignoring and returning.");
             return;
         }
 
@@ -149,7 +148,7 @@ public class DefaultEventBus implements EventBus {
 
     public void register(Object instance) {
         if (instance == null) {
-            log.info("Received null instance for event listener registration.  Ignoring registration request.");
+            LOGGER.info("Received null instance for event listener registration.  Ignoring registration request.");
             return;
         }
 
@@ -158,7 +157,7 @@ public class DefaultEventBus implements EventBus {
         List<EventListener> listeners = getEventListenerResolver().getEventListeners(instance);
 
         if (listeners == null || listeners.isEmpty()) {
-            log.warn("Unable to resolve event listeners for subscriber instance [{}]. Ignoring registration request.",
+            LOGGER.warn("Unable to resolve event listeners for subscriber instance [{}]. Ignoring registration request.",
                     instance);
             return;
         }
@@ -185,13 +184,13 @@ public class DefaultEventBus implements EventBus {
         }
     }
 
-    private class Subscription {
+    private static class Subscription {
 
         private final List<EventListener> listeners;
 
-        public Subscription(List<EventListener> listeners) {
+        Subscription(List<EventListener> listeners) {
             List<EventListener> toSort = new ArrayList<EventListener>(listeners);
-            Collections.sort(toSort, EVENT_LISTENER_COMPARATOR);
+            toSort.sort(EVENT_LISTENER_COMPARATOR);
             this.listeners = toSort;
         }
 
@@ -209,7 +208,7 @@ public class DefaultEventBus implements EventBus {
                     try {
                         listener.onEvent(event);
                     } catch (Throwable t) {
-                        log.warn(EVENT_LISTENER_ERROR_MSG, t);
+                        LOGGER.warn(EVENT_LISTENER_ERROR_MSG, t);
                     }
                     delivered.add(target);
                 }

@@ -33,7 +33,10 @@ import java.util.Set;
  *
  * @since 0.1
  */
-public class PermissionUtils {
+public final class PermissionUtils {
+
+    private PermissionUtils() {
+    }
 
     public static Set<Permission> resolveDelimitedPermissions(String s, PermissionResolver permissionResolver) {
         Set<String> permStrings = toPermissionStrings(s);
@@ -48,8 +51,9 @@ public class PermissionUtils {
         return null;
     }
 
-    public static Set<Permission> resolvePermissions(Collection<String> permissionStrings, PermissionResolver permissionResolver) {
-        Set<Permission> permissions = new LinkedHashSet<Permission>(permissionStrings.size());
+    public static Set<Permission> resolvePermissions(Collection<String> permissionStrings,
+                                                     PermissionResolver permissionResolver) {
+        Set<Permission> permissions = new LinkedHashSet<>(permissionStrings.size());
         for (String permissionString : permissionStrings) {
             permissions.add(permissionResolver.resolvePermission(permissionString));
         }

@@ -19,12 +19,15 @@
 package org.apache.shiro.guice.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertSame;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Created by IntelliJ IDEA.
@@ -49,7 +52,7 @@ public class AopAllianceMethodInvocationAdapterTest {
     }
 
     @Test
-    public void testGetArguments() throws Exception {
+    void testGetArguments() throws Exception {
         MethodInvocation mock = createMock(MethodInvocation.class);
         Object[] args = new Object[0];
         expect(mock.getArguments()).andReturn(args);
@@ -63,7 +66,7 @@ public class AopAllianceMethodInvocationAdapterTest {
     }
 
     @Test
-    public void testProceed() throws Throwable {
+    void testProceed() throws Throwable {
         MethodInvocation mock = createMock(MethodInvocation.class);
         Object value = new Object();
         expect(mock.proceed()).andReturn(value);
@@ -77,7 +80,7 @@ public class AopAllianceMethodInvocationAdapterTest {
     }
 
     @Test
-    public void testGetThis() throws Exception {
+    void testGetThis() throws Exception {
         MethodInvocation mock = createMock(MethodInvocation.class);
         Object value = new Object();
         expect(mock.getThis()).andReturn(value);

@@ -35,6 +35,12 @@ bin/
 target/
 
 #
+# NetBeans metadata
+#
+**nb-configuration.xml
+**faces-config.NavData
+
+#
 # VS Code
 #
 .factorypath
@@ -45,3 +51,5 @@ target/
 release.properties
 pom.xml.*
 -
+.sdkmanrc
+.DS_Store

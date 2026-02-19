@@ -22,12 +22,12 @@ import org.apache.shiro.authz.AuthorizationException
 import org.apache.shiro.authz.HostUnauthorizedException
 import org.apache.shiro.authz.UnauthenticatedException
 import org.apache.shiro.authz.UnauthorizedException
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.ExceptionMapper
 
-import static org.junit.Assert.assertEquals
+import static org.junit.jupiter.api.Assertions.assertEquals
 
 /**
  * Tests for {@link UnauthorizedExceptionExceptionMapper}.
@@ -37,12 +37,12 @@ class UnauthorizedExceptionExceptionMapperTest {
 
     @Test
     void testUnauthorizedException() {
-        doTest(new UnauthorizedException("expected test exception."), Response.Status.UNAUTHORIZED, new UnauthorizedExceptionExceptionMapper())
-        doTest(new HostUnauthorizedException("expected test exception."), Response.Status.UNAUTHORIZED, new UnauthorizedExceptionExceptionMapper())
-        doTest(new UnauthenticatedException("expected test exception."), Response.Status.FORBIDDEN, new UnauthenticatedExceptionExceptionMapper())
+        doTest(new UnauthorizedException("expected test exception."), Response.Status.FORBIDDEN, new UnauthorizedExceptionExceptionMapper())
+        doTest(new HostUnauthorizedException("expected test exception."), Response.Status.FORBIDDEN, new UnauthorizedExceptionExceptionMapper())
+        doTest(new UnauthenticatedException("expected test exception."), Response.Status.UNAUTHORIZED, new UnauthenticatedExceptionExceptionMapper())
     }
 
-    private static void doTest(AuthorizationException exception , Response.StatusType expectedStatus, ExceptionMapper<? extends Throwable> exceptionMapper) {
+    private static void doTest(AuthorizationException exception, Response.StatusType expectedStatus, ExceptionMapper<? extends Throwable> exceptionMapper) {
         final var response = exceptionMapper.toResponse(exception);
         assertEquals(expectedStatus.statusCode, response.status);
     }

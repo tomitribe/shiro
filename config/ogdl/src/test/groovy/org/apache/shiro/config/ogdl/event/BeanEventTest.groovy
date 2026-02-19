@@ -18,10 +18,10 @@
  */
 package org.apache.shiro.config.ogdl.event
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertSame
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertSame
 
 /**
  * @since 1.3
@@ -31,7 +31,7 @@ class BeanEventTest {
     @Test
     void testDefault() {
 
-        def m = [foo: 'bar'] as Map<String,Object>
+        def m = [foo: 'bar'] as Map<String, Object>
         Object o = new Object()
         BeanEvent evt = new MyBeanEvent('baz', o, m)
 

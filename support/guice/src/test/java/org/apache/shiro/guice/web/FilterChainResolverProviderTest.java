@@ -24,8 +24,8 @@ import com.google.inject.name.Names;
 import com.google.inject.spi.Dependency;
 import org.apache.shiro.util.PatternMatcher;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.Filter;
 import java.lang.reflect.Field;
@@ -34,7 +34,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.easymock.EasyMock.createMock;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This test relies on the internal structure of FilterChainResolver in order to check that it got created correctly.
@@ -48,36 +50,38 @@ public class FilterChainResolverProviderTest {
     private Key<? extends Filter> key2a;
     private FilterChainResolverProvider underTest;
 
-    @Before
+    @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() {
-        chains = new LinkedHashMap<String, Key<? extends Filter>[]>();
+        chains = new LinkedHashMap<>();
 
         key1a = Key.get(Filter.class, Names.named("key1a"));
         key1b = Key.get(Filter.class, Names.named("key1b"));
         key1c = Key.get(Filter.class, Names.named("key1c"));
         key2a = Key.get(Filter.class, Names.named("key2a"));
 
-        chains.put("one", new Key[]{key1a, key1b, key1c});
-        chains.put("two", new Key[]{key2a});
+        chains.put("one", new Key[] {key1a, key1b, key1c});
+        chains.put("two", new Key[] {key2a});
 
         underTest = new FilterChainResolverProvider(chains);
     }
 
     @Test
-    public void testGetDependencies() throws Exception {
+    @SuppressWarnings("unchecked")
+    void testGetDependencies() throws Exception {
 
         Set<Dependency<?>> dependencySet = underTest.getDependencies();
         assertEquals(4, dependencySet.size());
 
-        assertTrue("Dependency set doesn't contain key1a.", dependencySet.contains(Dependency.get(key1a)));
-        assertTrue("Dependency set doesn't contain key1b.", dependencySet.contains(Dependency.get(key1b)));
-        assertTrue("Dependency set doesn't contain key1c.", dependencySet.contains(Dependency.get(key1c)));
-        assertTrue("Dependency set doesn't contain key2a.", dependencySet.contains(Dependency.get(key2a)));
+        assertTrue(dependencySet.contains(Dependency.get(key1a)), "Dependency set doesn't contain key1a.");
+        assertTrue(dependencySet.contains(Dependency.get(key1b)), "Dependency set doesn't contain key1b.");
+        assertTrue(dependencySet.contains(Dependency.get(key1c)), "Dependency set doesn't contain key1c.");
+        assertTrue(dependencySet.contains(Dependency.get(key2a)), "Dependency set doesn't contain key2a.");
     }
 
 
     @Test
-    public void testGet() throws Exception {
+    void testGet() throws Exception {
 
         Injector injector = createMock(Injector.class);
         PatternMatcher patternMatcher = createMock(PatternMatcher.class);
