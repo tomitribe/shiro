@@ -31,12 +31,14 @@ import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager
 import org.apache.shiro.web.servlet.AbstractShiroFilter
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Test
+//import org.junit.jupiter.api.Test
+import org.junit.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
 import org.springframework.test.context.web.WebAppConfiguration
 
