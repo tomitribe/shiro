@@ -41,10 +41,10 @@
     <inceptionYear>2004</inceptionYear>
 
     <scm>
-        <connection>scm:git:https://gitbox.apache.org/repos/asf/shiro.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/shiro.git</developerConnection>
-        <url>https://github.com/apache/shiro/tree/${project.scm.tag}</url>
-        <tag>shiro-root-1.13.0</tag>
+        <connection>scm:git:git@github.com:tomitribe/shiro.git</connection>
+        <developerConnection>scm:git:git@github.com:tomitribe/shiro.git</developerConnection>
+        <url>git@github.com:tomitribe/shiro-git</url>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>Jira</system>
@@ -56,12 +56,16 @@
     </ciManagement>
 
     <distributionManagement>
-        <site>
-            <id>shiro.website</id>
-            <name>Apache Shiro Site</name>
-            <url>scp://people.apache.org/www/shiro.apache.org/static/latest</url>
-        </site>
-        <downloadUrl>https://shiro.apache.org/download.html</downloadUrl>
+        <repository>
+            <id>tomitribe.releases.https</id>
+            <name>Tomitribe Release Distribution Repository</name>
+            <url>https://repository.tomitribe.com/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>tomitribe.snapshots.https</id>
+            <name>Tomitribe Development Snapshot Repository</name>
+            <url>https://repository.tomitribe.com/content/repositories/snapshots-tomitribe</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <properties>
