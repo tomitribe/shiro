@@ -60,6 +60,7 @@ public class RegExPatternMatcher implements PatternMatcher {
      * Returns true if regex match should be case-insensitive.
      * @return true if regex match should be case-insensitive.
      */
+    @Override
     public boolean isCaseInsensitive() {
         return caseInsensitive;
     }
@@ -68,6 +69,7 @@ public class RegExPatternMatcher implements PatternMatcher {
      * Adds the Pattern.CASE_INSENSITIVE flag when compiling patterns.
      * @param caseInsensitive true if patterns should match case-insensitive.
      */
+    @Override
     public void setCaseInsensitive(boolean caseInsensitive) {
         this.caseInsensitive = caseInsensitive;
     }

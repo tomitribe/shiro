@@ -134,6 +134,7 @@ public class ShiroFilterFactoryBean implements FactoryBean<AbstractShiroFilter>,
     private String loginUrl;
     private String successUrl;
     private String unauthorizedUrl;
+    private boolean caseInsensitive;
 
     private AbstractShiroFilter instance;
 
@@ -282,6 +283,21 @@ public class ShiroFilterFactoryBean implements FactoryBean<AbstractShiroFilter>,
     }
 
     /**
+     * @return true if filter chain matching should be case insensitive.
+     */
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    /**
+     * Sets whether filter chain matching should be case insensitive.
+     * @param caseInsensitive true if filter chain matching should be case insensitive.
+     */
+    public void setCaseInsensitive(boolean caseInsensitive) {
+        this.caseInsensitive = caseInsensitive;
+    }
+
+    /**
      * Returns the filterName-to-Filter map of filters available for reference when defining filter chain definitions.
      * All filter chain definitions will reference filters by the names in this map (i.e. the keys).
      *
@@ -405,6 +421,7 @@ public class ShiroFilterFactoryBean implements FactoryBean<AbstractShiroFilter>,
     protected FilterChainManager createFilterChainManager() {
 
         DefaultFilterChainManager manager = new DefaultFilterChainManager();
+        manager.setCaseInsensitive(caseInsensitive);
         Map<String, Filter> defaultFilters = manager.getFilters();
         //apply global settings if necessary:
         for (Filter filter : defaultFilters.values()) {
@@ -484,7 +501,7 @@ public class ShiroFilterFactoryBean implements FactoryBean<AbstractShiroFilter>,
         //Expose the constructed FilterChainManager by first wrapping it in a
         // FilterChainResolver implementation. The AbstractShiroFilter implementations
         // do not know about FilterChainManagers - only resolvers:
-        PathMatchingFilterChainResolver chainResolver = new PathMatchingFilterChainResolver();
+        PathMatchingFilterChainResolver chainResolver = new PathMatchingFilterChainResolver().caseInsensitive(caseInsensitive);
         chainResolver.setFilterChainManager(manager);
 
         //Now create a concrete ShiroFilter instance and apply the acquired SecurityManager and built
