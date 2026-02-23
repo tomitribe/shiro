@@ -24,10 +24,11 @@
     <parent>
         <groupId>org.apache.shiro</groupId>
         <artifactId>shiro-root</artifactId>
-        <version>1.13.0-TT.1</version>
+        <version>1.13.0-TT.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>shiro-crypto</artifactId>
+  <version>1.13.0</version>
     <name>Apache Shiro :: Cryptography</name>
     <packaging>pom</packaging>
 
