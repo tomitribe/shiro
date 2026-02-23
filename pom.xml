@@ -30,7 +30,7 @@
     <groupId>org.apache.shiro</groupId>
     <artifactId>shiro-root</artifactId>
     <packaging>pom</packaging>
-    <version>1.13.0</version>
+    <version>1.13.0-TT.1-SNAPSHOT</version>
 
     <name>Apache Shiro</name>
     <url>https://shiro.apache.org/</url>
@@ -687,14 +687,14 @@
                     <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <allowTimestampedSnapshots>false</allowTimestampedSnapshots>
+                    <preparationGoals>clean install</preparationGoals>
                     <!-- This configuration copied from apache:apache:7 parent pom -->
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <goals>deploy site site:stage</goals>
-                    <arguments>-Pdocs,apache-release -DskipITs -DskipTests</arguments>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <goals>deploy</goals>
+                    <arguments>-DskipITs -DskipTests</arguments>
                 </configuration>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.13</version>
@@ -705,6 +705,7 @@
                     <skipNexusStagingDeployMojo>${nexus.deploy.skip}</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
+-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
