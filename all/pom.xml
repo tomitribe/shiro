@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.apache.shiro</groupId>
         <artifactId>shiro-root</artifactId>
-        <version>1.13.0-TT.2</version>
+        <version>1.13.0-TT.3-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>shiro-all</artifactId>
-  <version>1.13.0-TT.2</version>
+  <version>1.13.0</version>
     <name>Apache Shiro :: All (aggregate jar)</name>
     <description>Creates an aggregate jar that contains the contents of all other Shiro module .jars (aka an 'uber jar')</description>
     <packaging>pom</packaging>
