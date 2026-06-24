@@ -23,12 +23,12 @@
     <parent>
         <groupId>org.apache.shiro</groupId>
         <artifactId>shiro-root</artifactId>
-        <version>1.13.0-TT.3</version>
+        <version>1.13.0-TT.4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.shiro.integrationtests</groupId>
     <artifactId>shiro-integration-tests</artifactId>
-  <version>1.13.0-TT.3</version>
+  <version>1.13.0</version>
 
     <name>Apache Shiro :: Integration Tests</name>
     <description>Test for alternate major versions of dependencies</description>
