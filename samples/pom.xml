@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.apache.shiro</groupId>
         <artifactId>shiro-root</artifactId>
-        <version>1.13.0-TT.3-SNAPSHOT</version>
+        <version>1.13.0-TT.3</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.shiro.samples</groupId>
     <artifactId>shiro-samples</artifactId>
-  <version>1.13.0</version>
+  <version>1.13.0-TT.3</version>
     <name>Apache Shiro :: Samples</name>
     <packaging>pom</packaging>
 
