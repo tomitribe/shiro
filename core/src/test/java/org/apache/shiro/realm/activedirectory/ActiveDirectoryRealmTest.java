@@ -130,6 +130,42 @@ public class ActiveDirectoryRealmTest {
         assertExistingUserSuffix(USERNAME + "@EXAMPLE.com", "testuser@EXAMPLE.com");
     }
 
+    /**
+     * Regression test for CVE-2026-49268 (LDAP injection): {@link ActiveDirectoryRealm} must escape
+     * user-supplied input per RFC 2253 before using it to build the LDAP query argument, so an
+     * attacker cannot inject extra RDN components / alter the query structure.
+     * <p/>
+     * Without the {@code Rdn.escapeValue(username)} fix the captured argument is the raw
+     * {@code testuser,ou=admins} (unescaped ',' and '=').
+     */
+    @Test
+    public void testGetRoleNamesForUserEscapesInjectionCharacters() throws Exception {
+
+        LdapContext ldapContext = createMock(LdapContext.class);
+        NamingEnumeration<SearchResult> results = createMock(NamingEnumeration.class);
+        Capture<Object[]> captureArgs = Capture.newInstance(CaptureType.ALL);
+        expect(ldapContext.search(anyString(), anyString(), capture(captureArgs), anyObject(SearchControls.class))).andReturn(results);
+        replay(ldapContext);
+
+        ActiveDirectoryRealm activeDirectoryRealm = new ActiveDirectoryRealm();
+
+        SecurityManager securityManager = new DefaultSecurityManager(activeDirectoryRealm);
+        Subject subject = new Subject.Builder(securityManager).buildSubject();
+        subject.execute(() -> {
+
+            try {
+                activeDirectoryRealm.getRoleNamesForUser("testuser,ou=admins", ldapContext);
+            } catch (NamingException e) {
+                Assert.fail("Unexpected NamingException thrown during test");
+            }
+        });
+
+        Object[] args = captureArgs.getValue();
+        assertThat(args, arrayWithSize(1));
+        // injected ',' and '=' are backslash-escaped, so they cannot break out of the value
+        assertThat(args[0], is("testuser\\,ou\\=admins"));
+    }
+
     public void assertExistingUserSuffix(String username, String expectedPrincipalName) throws Exception {
 
         LdapContext ldapContext = createMock(LdapContext.class);
