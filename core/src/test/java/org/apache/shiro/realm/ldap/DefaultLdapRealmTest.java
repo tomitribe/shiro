@@ -176,4 +176,33 @@ public class DefaultLdapRealmTest {
         String userDn = realm.getUserDn(principal);
         assertEquals(principal, userDn);
     }
+
+    /**
+     * A normal username must be substituted into the template unchanged so that the fix for
+     * CVE-2026-49268 does not alter legitimate authentication behavior.
+     */
+    @Test
+    public void testGetUserDnLeavesOrdinaryUsernameUnchanged() {
+        realm.setUserDnTemplate("uid={0},ou=users,dc=mycompany,dc=com");
+        assertEquals("uid=jsmith,ou=users,dc=mycompany,dc=com", realm.getUserDn("jsmith"));
+    }
+
+    /**
+     * Regression test for CVE-2026-49268 (LDAP DN injection): user-supplied input must be escaped
+     * per RFC 2253 before being concatenated into the user DN, so an attacker cannot inject extra
+     * RDN components and alter the DN structure used for the bind.
+     * <p>
+     * Without the {@code Rdn.escapeValue(principal)} fix this returns
+     * {@code uid=jsmith,ou=admins,ou=users,dc=mycompany,dc=com} (two uid/ou breakouts).
+     */
+    @Test
+    public void testGetUserDnEscapesInjectionCharacters() {
+        realm.setUserDnTemplate("uid={0},ou=users,dc=mycompany,dc=com");
+
+        // Attacker attempts to break out of the uid RDN and graft on a privileged subtree.
+        String userDn = realm.getUserDn("jsmith,ou=admins");
+
+        // The injected ',' and '=' are backslash-escaped, leaving exactly one uid RDN intact.
+        assertEquals("uid=jsmith\\,ou\\=admins,ou=users,dc=mycompany,dc=com", userDn);
+    }
 }

@@ -39,6 +39,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
+import javax.naming.ldap.Rdn;
 import java.util.*;
 
 
@@ -162,7 +163,7 @@ public class ActiveDirectoryRealm extends AbstractLdapRealm {
         SearchControls searchCtls = new SearchControls();
         searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-        String userPrincipalName = username;
+        String userPrincipalName = Rdn.escapeValue(username);
         if (principalSuffix != null && !userPrincipalName.toLowerCase(Locale.ROOT).endsWith(principalSuffix.toLowerCase(Locale.ROOT))) {
             userPrincipalName += principalSuffix;
         }
